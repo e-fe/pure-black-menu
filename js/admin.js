@@ -211,6 +211,17 @@ function modal(html) {
   return { el: bd, close };
 }
 
+const NEW_CAT = "__new__";
+// Kategori seçimi: gruplara ayrılmış liste + en altta "Yeni kategori"
+function categoryOptions(selected) {
+  const info = catInfo();
+  return GROUPS.map(([g, label]) => {
+    const list = info.filter((c) => c.group === g);
+    return list.length ? `<optgroup label="${label}">${list.map((c) =>
+      `<option value="${esc(c.name)}" ${c.name === selected ? "selected" : ""}>${esc(c.name)}${c.hidden ? " (gizli)" : ""}</option>`).join("")}</optgroup>` : "";
+  }).join("") + `<option value="${NEW_CAT}">＋ Yeni kategori…</option>`;
+}
+
 function openEditor(it = null) {
   const editing = !!it?.id;
   const v = it || { name: "", category: filter.cat !== "all" ? filter.cat : cats()[0], price: "", sizes: null, desc: "", emoji: "☕", image: "", active: true, tags: [] };
@@ -222,10 +233,13 @@ function openEditor(it = null) {
       <label class="field"><span>Ürün adı *</span><input name="name" required maxlength="60" value="${esc(v.name)}" placeholder="örn. Fıstıklı Latte" /></label>
       <div class="grid2">
         <label class="field"><span>Kategori</span>
-          <input name="category" list="catList" value="${esc(v.category)}" required />
-          <datalist id="catList">${cats().map((c) => `<option value="${esc(c)}">`).join("")}</datalist>
+          <select name="category" required>${categoryOptions(v.category)}</select>
         </label>
         <label class="field" id="singlePrice"><span>Fiyat (₺) *</span><input name="price" type="number" min="0" step="0.5" value="${esc(v.price)}" inputmode="decimal" /></label>
+      </div>
+      <div class="new-cat hidden" id="newCat">
+        <label class="field"><span>Yeni kategori adı *</span><input name="newCat" maxlength="40" placeholder="örn. Kahvaltı" autocomplete="off" /></label>
+        <label class="field"><span>Grup</span><select name="newCatGroup">${GROUPS.map(([g, l]) => `<option value="${g}">${l}</option>`).join("")}</select></label>
       </div>
       <label class="inline"><span class="switch"><input type="checkbox" name="useSizes" ${useSizes ? "checked" : ""}/><span></span></span> Boyut fiyatları kullan</label>
       <div class="grid3" id="sizeFields">${SIZE_KEYS.map(([k, l, name]) => `<label class="field"><span>${name} (${l}) ₺</span><input name="size_${k}" type="number" min="0" step="0.5" value="${sz[k] ?? ""}" inputmode="decimal" /></label>`).join("")}</div>
@@ -255,14 +269,39 @@ function openEditor(it = null) {
   };
   sizeToggle.addEventListener("change", syncSizes);
   syncSizes();
+  // "＋ Yeni kategori…" seçilince ad ve grup alanlarını aç
+  const catSel = $("[name=category]", m.el), newCatInput = $("[name=newCat]", m.el);
+  catSel.addEventListener("change", () => {
+    const isNew = catSel.value === NEW_CAT;
+    $("#newCat", m.el).classList.toggle("hidden", !isNew);
+    newCatInput.required = isNew;
+    if (isNew) newCatInput.focus();
+  });
+  if (catSel.value === NEW_CAT) catSel.dispatchEvent(new Event("change")); // hiç kategori yoksa
   $("[name=name]", m.el).focus();
   $("#ed", m.el).addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = new FormData(e.target);
     const sizes = sizeToggle.checked ? normalizeSizes({ s: f.get("size_s"), m: f.get("size_m"), l: f.get("size_l") }) : null;
     if (sizeToggle.checked && !sizes) { toast("En az bir boyut fiyatı girin"); return; }
+    let category = f.get("category");
+    if (category === NEW_CAT) {
+      const name = f.get("newCat").trim();
+      const existing = cats().find((c) => trLower(c) === trLower(name));
+      if (existing) {
+        // Aynı ad (büyük/küçük harf farkıyla) zaten var: yeni sekme açma, mevcut olanı seç
+        catSel.value = existing; catSel.dispatchEvent(new Event("change"));
+        toast(`"${existing}" zaten var, listeden seçildi. Tekrar kaydedin.`);
+        return;
+      }
+      await store.saveSettings({
+        categories: [...cats(), name],
+        categoryGroups: { ...(data.settings.categoryGroups || {}), [name]: f.get("newCatGroup") },
+      });
+      category = name;
+    }
     const out = {
-      name: f.get("name").trim(), category: f.get("category").trim(),
+      name: f.get("name").trim(), category,
       price: sizes ? (sizes.m ?? sizes.s ?? sizes.l) : Number(f.get("price")), sizes,
       desc: f.get("desc").trim(), image: f.get("image").trim(), emoji,
       tags: f.getAll("tags"), active: f.get("active") === "on",
