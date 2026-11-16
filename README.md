@@ -2,6 +2,14 @@
 
 **Pure Black** — Kavaklı Sahili, Gölcük / Kocaeli
 
+### 🔗 Canlı site
+
+| | |
+|---|---|
+| **Müşteri menüsü** | https://e-fe.github.io/pure-black-menu/ |
+| **Personel paneli** | https://e-fe.github.io/pure-black-menu/admin.html (demo şifresi: `1234`) |
+| **Sunum ekranı** | https://e-fe.github.io/pure-black-menu/sunum.html |
+
 Kafenin içecek ve yiyecek menüsü, masadaki QR kodla açılır ve **canlı güncellenir**.
 Personel panelden biten ürünü tek dokunuşla "Tükendi" yapar, yeni ürün ve sekme ekler;
 müşterinin telefonundaki menü anında değişir.
