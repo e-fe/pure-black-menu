@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Personel Paneli · Pure Black</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- GİRİŞ -->
+  <section id="loginView" class="login hidden">
+    <div class="logo-mark">PB</div>
+    <h1>Personel Paneli</h1>
+    <p>Menüyü yönetmek için giriş yapın</p>
+    <form id="loginForm">
+      <label class="field hidden" id="emailField"><span>E-posta</span><input type="email" name="email" autocomplete="username" /></label>
+      <label class="field"><span id="passLabel">Şifre</span><input type="password" name="pass" required autocomplete="current-password" inputmode="numeric" /></label>
+      <div class="err" id="loginErr"></div>
+      <button class="btn primary" type="submit">Giriş yap</button>
+    </form>
+    <div class="hint" id="loginHint"></div>
+  </section>
+
+  <!-- PANEL -->
+  <main id="appView" class="admin hidden">
+    <header class="topbar">
+      <div>
+        <div class="brand" id="brand">…</div>
+        <div class="sub" id="today"></div>
+      </div>
+      <span class="mode" id="mode"></span>
+      <div class="sp"></div>
+      <a class="btn" href="index.html" target="_blank">↗ Menüyü gör</a>
+      <button class="btn" id="qrBtn">▦ QR kod</button>
+      <button class="btn" id="tabsBtn">☰ Sekmeler</button>
+      <button class="btn" id="settingsBtn">⚙ Ayarlar</button>
+      <button class="btn ghost" id="logoutBtn">Çıkış</button>
+    </header>
+
+    <div class="stats">
+      <div class="stat g"><div class="v" id="sActive">0</div><div class="l">Menüde aktif</div></div>
+      <div class="stat a"><div class="v" id="sPassive">0</div><div class="l">Pasif / tükendi</div></div>
+      <div class="stat"><div class="v" id="sToday">0</div><div class="l">Bugün aktife alınan</div></div>
+      <div class="stat"><div class="v" id="sTotal">0</div><div class="l">Toplam ürün</div></div>
+    </div>
+
+    <div class="toolbar">
+      <input class="search" id="q" type="search" placeholder="Ürün ara…" />
+      <div class="seg" id="statusSeg">
+        <button data-s="all" class="on">Hepsi</button>
+        <button data-s="on">Aktif</button>
+        <button data-s="off">Pasif</button>
+      </div>
+      <button class="btn primary" id="addBtn">＋ Ürün ekle</button>
+    </div>
+    <div class="toolbar">
+      <button class="btn sm danger" id="dayEnd">☾ Gün sonu: hepsini pasif yap</button>      <div class="sp" style="flex:1"></div>
+      <button class="btn sm ghost" id="exportBtn">⬇ Yedek al</button>
+      <label class="btn sm ghost">⬆ Yedek yükle<input type="file" id="importFile" accept="application/json" hidden /></label>
+    </div>
+
+    <div class="cat-filter" id="catFilter"></div>
+    <div class="list" id="list"></div>
+  </main>
+
+  <div class="toasts" id="toasts"></div>
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
