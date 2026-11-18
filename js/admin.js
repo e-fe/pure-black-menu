@@ -1,12 +1,13 @@
-import { createStore, isToday, normalizeSizes, SIZE_KEYS, categoryList, GROUPS } from "./store.js";
+import { createStore, isToday, normalizeSizes, SIZE_KEYS, categoryList, normalizeDiscount, discounted, discountLabel } from "./store.js";
 import { ADMIN_PIN } from "./config.js";
 
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const tl = (n) => "₺" + Number(n).toLocaleString("tr-TR", { maximumFractionDigits: 2 });
 
-const EMOJIS = ["☕","🧋","🥤","🍵","🫖","🧊","🍹","🥛","🍋","🥭","🍓","🍌","🫐","🍰","🎂","🧁","🍮","🍫","🍪","🍩","🥧","🍒","🍯","🍥","🥮","🧀","🌰","🍦","🍨","🥐","🥪","🥕"];
-const TAGS = ["yeni", "imza", "çok satan", "yöresel", "sıcak", "soğuk", "kafeinsiz", "laktozsuz seçenek", "glutensiz", "vegan", "şekersiz"];
+const EMOJIS = ["🍰","🎂","🧁","🍮","🍫","🍪","🍩","🥧","🧇","🍬","🍭","🍨","🍦","🍓","🍒","🍌","🍋","🫐","🥭","🍯","🍥","🥮","🧀","🌰","🥛","☕","🥐","🥕","🟫","🟡"];
+const TAGS = ["yeni", "imza", "çok satan", "yöresel", "sıcak", "soğuk", "glutensiz", "vegan", "şekersiz"];
+const DISC = "__disc__"; // "İndirimde" filtresi
 
 let store, data = { items: [], settings: {} };
 let tabsUI = null; // açık Sekmeler modalı
@@ -63,22 +64,22 @@ function render() {
   const info = catInfo();
   const allCats = info.map((c) => c.name);
   const chip = (c) => `<button class="chip ${filter.cat === c.name ? "on" : ""} ${c.hidden ? "is-hidden" : ""}" data-c="${esc(c.name)}"${c.hidden ? ' title="Menüde gizli"' : ""}>${esc(c.name)}<span class="n">${c.count}</span></button>`;
+  const nDisc = items.filter((i) => i.discount).length;
   $("#catFilter").innerHTML =
     `<button class="chip ${filter.cat === "all" ? "on" : ""}" data-c="all">Tüm kategoriler<span class="n">${items.length}</span></button>` +
-    GROUPS.map(([g, label]) => {
-      const list = info.filter((c) => c.group === g && c.count);
-      return list.length ? `<span class="chip-group">${label}</span>` + list.map(chip).join("") : "";
-    }).join("");
+    (nDisc ? `<button class="chip disc-chip ${filter.cat === DISC ? "on" : ""}" data-c="${DISC}">İndirimde<span class="n">${nDisc}</span></button>` : "") +
+    `<span class="chip-group"></span>` + info.filter((c) => c.count).map(chip).join("");
+  if (filter.cat === DISC && !nDisc) filter.cat = "all";
   if (tabsUI?.el.isConnected) tabsUI.render();
 
   const q = filter.q.toLocaleLowerCase("tr");
   const list = items.filter((i) =>
     (filter.status === "all" || (filter.status === "on") === i.active) &&
-    (filter.cat === "all" || i.category === filter.cat) &&
+    (filter.cat === "all" || (filter.cat === DISC ? !!i.discount : i.category === filter.cat)) &&
     (!q || (i.name + " " + i.desc + " " + i.category).toLocaleLowerCase("tr").includes(q)));
 
   if (!items.length) {
-    $("#list").innerHTML = `<div class="empty"><div class="big">☕</div><p>Henüz ürün yok.</p>
+    $("#list").innerHTML = `<div class="empty"><div class="big">🍰</div><p>Henüz ürün yok.</p>
       <button class="btn primary" id="emptyAdd">＋ İlk ürünü ekle</button>
       <button class="btn" id="loadSamples">Örnek menüyü yükle</button></div>`;
     $("#emptyAdd").onclick = () => openEditor();
@@ -88,7 +89,7 @@ function render() {
   if (!list.length) { $("#list").innerHTML = `<div class="empty"><p>Bu filtreye uyan ürün yok.</p></div>`; return; }
 
   $("#list").innerHTML = allCats.map((c) => {
-    const rows = list.filter((i) => i.category === c).sort((a, b) => a.name.localeCompare(b.name, "tr"));
+    const rows = list.filter((i) => i.category === c).sort((a, b) => (!!b.discount - !!a.discount) || a.name.localeCompare(b.name, "tr"));
     if (!rows.length) return "";
     const allOn = rows.every((r) => r.active);
     const hidden = (settings.hiddenCategories || []).includes(c);
@@ -101,18 +102,22 @@ function render() {
 
 function priceLabel(it) {
   const sz = normalizeSizes(it.sizes);
-  if (!sz) return tl(it.price);
-  const v = Object.values(sz);
-  return v.length > 1 ? `${tl(Math.min(...v))}–${Math.max(...v)}` : tl(v[0]);
+  const d = normalizeDiscount(it.discount);
+  const v = sz ? Object.values(sz) : [it.price];
+  const range = (arr) => (arr.length > 1 ? `${tl(Math.min(...arr))}–${Math.max(...arr)}` : tl(arr[0]));
+  if (!d) return range(v);
+  return `<s>${range(v)}</s> <b>${range(v.map((p) => discounted(p, d)))}</b>`;
 }
 
 function row(it) {
   const thumb = it.image ? `<img src="${esc(it.image)}" alt="" />` : esc(it.emoji);
   const meta = [it.desc, ...(it.tags || [])].filter(Boolean).join(" · ");
   const fresh = it.active && isToday(it.activatedAt) ? ` <span class="tag fresh">bugün</span>` : "";
+  const d = normalizeDiscount(it.discount);
+  const disc = d ? ` <span class="tag disc" title="${esc(discountLabel(d))}">${d.type === "pct" ? `%${d.value}` : `−₺${d.value}`}</span>` : "";
   return `<div class="row ${it.active ? "" : "off"}" data-id="${it.id}">
     <div class="thumb">${thumb}</div>
-    <div class="info"><div class="name">${esc(it.name)}${fresh}</div><div class="meta">${esc(meta) || "&nbsp;"}</div></div>
+    <div class="info"><div class="name">${esc(it.name)}${disc}${fresh}</div><div class="meta">${esc(meta) || "&nbsp;"}</div></div>
     <div class="rp">${priceLabel(it)}</div>
     <label class="switch" title="${it.active ? "Menüden kaldır" : "Menüye ekle"}">
       <input type="checkbox" data-toggle ${it.active ? "checked" : ""} aria-label="${esc(it.name)} aktif" /><span></span>
@@ -212,25 +217,24 @@ function modal(html) {
 }
 
 const NEW_CAT = "__new__";
-// Kategori seçimi: gruplara ayrılmış liste + en altta "Yeni kategori"
+// Kategori seçimi: Sekmeler sırasındaki liste + en altta "Yeni kategori"
 function categoryOptions(selected) {
-  const info = catInfo();
-  return GROUPS.map(([g, label]) => {
-    const list = info.filter((c) => c.group === g);
-    return list.length ? `<optgroup label="${label}">${list.map((c) =>
-      `<option value="${esc(c.name)}" ${c.name === selected ? "selected" : ""}>${esc(c.name)}${c.hidden ? " (gizli)" : ""}</option>`).join("")}</optgroup>` : "";
-  }).join("") + `<option value="${NEW_CAT}">＋ Yeni kategori…</option>`;
+  return catInfo().map((c) =>
+    `<option value="${esc(c.name)}" ${c.name === selected ? "selected" : ""}>${esc(c.name)}${c.hidden ? " (gizli)" : ""}</option>`).join("") +
+    `<option value="${NEW_CAT}">＋ Yeni kategori…</option>`;
 }
 
 function openEditor(it = null) {
   const editing = !!it?.id;
-  const v = it || { name: "", category: filter.cat !== "all" ? filter.cat : cats()[0], price: "", sizes: null, desc: "", emoji: "☕", image: "", active: true, tags: [] };
+  const startCat = filter.cat !== "all" && filter.cat !== DISC ? filter.cat : cats()[0];
+  const v = it || { name: "", category: startCat, price: "", sizes: null, discount: null, desc: "", emoji: "🍰", image: "", active: true, tags: [] };
+  const dv = normalizeDiscount(v.discount);
   const sz = normalizeSizes(v.sizes) || {};
   const useSizes = !!normalizeSizes(v.sizes);
   const m = modal(`
     <h3>${editing ? "Ürünü düzenle" : "Yeni ürün ekle"}</h3>
     <form id="ed">
-      <label class="field"><span>Ürün adı *</span><input name="name" required maxlength="60" value="${esc(v.name)}" placeholder="örn. Fıstıklı Latte" /></label>
+      <label class="field"><span>Ürün adı *</span><input name="name" required maxlength="60" value="${esc(v.name)}" placeholder="örn. Fıstıklı Sarma" /></label>
       <div class="grid2">
         <label class="field"><span>Kategori</span>
           <select name="category" required>${categoryOptions(v.category)}</select>
@@ -238,11 +242,21 @@ function openEditor(it = null) {
         <label class="field" id="singlePrice"><span>Fiyat (₺) *</span><input name="price" type="number" min="0" step="0.5" value="${esc(v.price)}" inputmode="decimal" /></label>
       </div>
       <div class="new-cat hidden" id="newCat">
-        <label class="field"><span>Yeni kategori adı *</span><input name="newCat" maxlength="40" placeholder="örn. Kahvaltı" autocomplete="off" /></label>
-        <label class="field"><span>Grup</span><select name="newCatGroup">${GROUPS.map(([g, l]) => `<option value="${g}">${l}</option>`).join("")}</select></label>
+        <label class="field"><span>Yeni kategori adı *</span><input name="newCat" maxlength="40" placeholder="örn. Pastalar" autocomplete="off" /></label>
       </div>
       <label class="inline"><span class="switch"><input type="checkbox" name="useSizes" ${useSizes ? "checked" : ""}/><span></span></span> Boyut fiyatları kullan</label>
       <div class="grid3" id="sizeFields">${SIZE_KEYS.map(([k, l, name]) => `<label class="field"><span>${name} (${l}) ₺</span><input name="size_${k}" type="number" min="0" step="0.5" value="${sz[k] ?? ""}" inputmode="decimal" /></label>`).join("")}</div>
+      <div class="field disc-field"><span>İndirim (isteğe bağlı)</span>
+        <div class="disc-row">
+          <input name="discValue" type="number" min="0" step="0.5" inputmode="decimal" placeholder="Miktar" value="${dv ? dv.value : ""}" aria-label="İndirim miktarı" />
+          <select name="discType" aria-label="İndirim türü">
+            <option value="pct" ${dv?.type !== "tl" ? "selected" : ""}>% Yüzde</option>
+            <option value="tl" ${dv?.type === "tl" ? "selected" : ""}>₺ TL</option>
+          </select>
+          <button type="button" class="btn sm ghost" id="discClear" ${dv ? "" : "hidden"}>Kaldır</button>
+        </div>
+        <div class="disc-preview" id="discPrev"></div>
+      </div>
       <label class="field"><span>Açıklama</span><textarea name="desc" maxlength="160" placeholder="İçerik, servis şekli…">${esc(v.desc)}</textarea></label>
       <div class="field"><span>Simge</span><div class="emojis" id="emo">${EMOJIS.map((e) => `<button type="button" class="${e === v.emoji ? "on" : ""}">${e}</button>`).join("")}</div></div>
       <label class="field"><span>Fotoğraf bağlantısı (isteğe bağlı — simgenin yerine geçer)</span><input name="image" type="url" value="${esc(v.image)}" placeholder="https://…" /></label>
@@ -269,6 +283,40 @@ function openEditor(it = null) {
   };
   sizeToggle.addEventListener("change", syncSizes);
   syncSizes();
+  // İndirim önizlemesi: eski → yeni fiyat
+  const form = $("#ed", m.el);
+  const currentPrices = () => {
+    if (sizeToggle.checked) {
+      return SIZE_KEYS.map(([k, l]) => [l, Number(form.elements[`size_${k}`].value)]).filter(([, p]) => p > 0);
+    }
+    const p = Number(form.elements.price.value);
+    return p > 0 ? [["", p]] : [];
+  };
+  const readDiscount = () => normalizeDiscount({ type: form.elements.discType.value, value: form.elements.discValue.value });
+  const discError = () => {
+    const raw = Number(form.elements.discValue.value);
+    if (!form.elements.discValue.value || raw === 0) return "";
+    if (raw < 0) return "İndirim eksi olamaz";
+    if (form.elements.discType.value === "pct" && raw >= 100) return "Yüzde 1–99 arasında olmalı";
+    const prices = currentPrices().map(([, p]) => p);
+    if (form.elements.discType.value === "tl" && prices.length && raw >= Math.min(...prices)) return "TL indirim fiyattan küçük olmalı";
+    return "";
+  };
+  const syncDisc = () => {
+    const d = readDiscount(), err = discError(), prev = $("#discPrev", m.el);
+    $("#discClear", m.el).hidden = !form.elements.discValue.value;
+    prev.classList.toggle("err", !!err);
+    if (err) { prev.textContent = err; return; }
+    if (!d) { prev.textContent = ""; return; }
+    const prices = currentPrices();
+    prev.innerHTML = prices.length
+      ? prices.map(([l, p]) => `${l ? `<b>${l}</b> ` : ""}<s>${tl(p)}</s> → <strong>${tl(discounted(p, d))}</strong>`).join(" · ") + ` <em>(${esc(discountLabel(d))})</em>`
+      : `${esc(discountLabel(d))} — fiyat girince yeni fiyat burada görünür`;
+  };
+  form.addEventListener("input", syncDisc);
+  form.addEventListener("change", syncDisc);
+  $("#discClear", m.el).onclick = () => { form.elements.discValue.value = ""; syncDisc(); };
+  syncDisc();
   // "＋ Yeni kategori…" seçilince ad ve grup alanlarını aç
   const catSel = $("[name=category]", m.el), newCatInput = $("[name=newCat]", m.el);
   catSel.addEventListener("change", () => {
@@ -284,6 +332,9 @@ function openEditor(it = null) {
     const f = new FormData(e.target);
     const sizes = sizeToggle.checked ? normalizeSizes({ s: f.get("size_s"), m: f.get("size_m"), l: f.get("size_l") }) : null;
     if (sizeToggle.checked && !sizes) { toast("En az bir boyut fiyatı girin"); return; }
+    const dErr = discError();
+    if (dErr) { toast(dErr); form.elements.discValue.focus(); return; }
+    const discount = readDiscount();
     let category = f.get("category");
     if (category === NEW_CAT) {
       const name = f.get("newCat").trim();
@@ -294,22 +345,19 @@ function openEditor(it = null) {
         toast(`"${existing}" zaten var, listeden seçildi. Tekrar kaydedin.`);
         return;
       }
-      await store.saveSettings({
-        categories: [...cats(), name],
-        categoryGroups: { ...(data.settings.categoryGroups || {}), [name]: f.get("newCatGroup") },
-      });
+      await store.saveSettings({ categories: [...cats(), name] });
       category = name;
     }
     const out = {
       name: f.get("name").trim(), category,
-      price: sizes ? (sizes.m ?? sizes.s ?? sizes.l) : Number(f.get("price")), sizes,
+      price: sizes ? (sizes.m ?? sizes.s ?? sizes.l) : Number(f.get("price")), sizes, discount,
       desc: f.get("desc").trim(), image: f.get("image").trim(), emoji,
       tags: f.getAll("tags"), active: f.get("active") === "on",
     };
     if (editing) await store.updateItem(it.id, out);
     else await store.addItem(out);
     m.close();
-    toast(editing ? `${out.name} güncellendi` : `🎉 ${out.name} eklendi${out.active ? " ve menüde" : ""}`);
+    toast(editing ? `${out.name} güncellendi` : `${out.name} eklendi${out.active ? " ve menüde" : ""}`);
   });
 }
 
@@ -343,7 +391,7 @@ $("#tabsBtn").onclick = openTabs;
 const trLower = (s) => s.toLocaleLowerCase("tr");
 const catSnapshot = () => {
   const s = data.settings;
-  return { categories: [...(s.categories || [])], hiddenCategories: [...(s.hiddenCategories || [])], categoryGroups: { ...(s.categoryGroups || {}) } };
+  return { categories: [...(s.categories || [])], hiddenCategories: [...(s.hiddenCategories || [])] };
 };
 const nameTaken = (name, except) => cats().some((c) => c !== except && trLower(c) === trLower(name));
 
@@ -354,7 +402,6 @@ function openTabs() {
     <div class="tab-list" id="tabList"></div>
     <form class="tab-new" id="newTab">
       <input name="name" maxlength="40" placeholder="＋ Yeni sekme adı yazıp Enter'a basın" autocomplete="off" />
-      <select name="group" aria-label="Grup">${GROUPS.map(([g, l]) => `<option value="${g}">${l}</option>`).join("")}</select>
     </form>
     <div class="actions"><button class="btn primary" data-close>Bitti</button></div>`);
   m.el.querySelector(".modal").classList.add("wide");
@@ -372,12 +419,10 @@ function openTabs() {
     const info = catInfo();
     const c = info.find((x) => x.name === name);
     if (e.target.closest("[data-up], [data-down]")) {
-      const same = info.filter((x) => x.group === c.group).map((x) => x.name);
-      const i = same.indexOf(name), j = i + (e.target.closest("[data-up]") ? -1 : 1);
-      if (j < 0 || j >= same.length) return;
       const order = info.map((x) => x.name);
-      const a = order.indexOf(same[i]), b = order.indexOf(same[j]);
-      [order[a], order[b]] = [order[b], order[a]];
+      const i = order.indexOf(name), j = i + (e.target.closest("[data-up]") ? -1 : 1);
+      if (j < 0 || j >= order.length) return;
+      [order[i], order[j]] = [order[j], order[i]];
       await store.saveSettings({ categories: order });
       toast(`${name} ${j < i ? "yukarı" : "aşağı"} taşındı`);
     } else if (e.target.closest("[data-ren]")) {
@@ -400,15 +445,6 @@ function openTabs() {
       if (mode === "move") await deleteTab(name, { moveTo: $("select[name=moveTo]", panel).value });
       else await deleteTab(name, { withItems: true });
     }
-  });
-
-  // Grup seçimi
-  listEl.addEventListener("change", async (e) => {
-    const sel = e.target.closest("select[data-group]");
-    if (!sel) return;
-    const name = sel.closest("[data-name]").dataset.name;
-    await store.saveSettings({ categoryGroups: { ...(data.settings.categoryGroups || {}), [name]: sel.value } });
-    toast(`${name} → ${GROUPS.find(([g]) => g === sel.value)[1]}`);
   });
 
   // Yeniden adlandırma: Enter kaydeder, Esc vazgeçer
@@ -441,9 +477,9 @@ function openTabs() {
   });
   listEl.addEventListener("dragend", () => { dragName = null; listEl.querySelectorAll(".dragging, .drop-before, .drop-after").forEach((x) => x.classList.remove("dragging", "drop-before", "drop-after")); });
   const dropTarget = (e) => {
-    const t = e.target.closest(".tab-row, .tab-group-h");
+    const t = e.target.closest(".tab-row");
     if (!t || t.dataset.name === dragName) return null;
-    const after = t.classList.contains("tab-row") && e.clientY > t.getBoundingClientRect().top + t.offsetHeight / 2;
+    const after = e.clientY > t.getBoundingClientRect().top + t.offsetHeight / 2;
     return { t, after };
   };
   listEl.addEventListener("dragover", (e) => {
@@ -457,21 +493,10 @@ function openTabs() {
     if (!dragName) return;
     const d = dropTarget(e); if (!d) return;
     e.preventDefault();
-    const info = catInfo();
-    const order = info.map((x) => x.name).filter((n) => n !== dragName);
-    let group, idx;
-    if (d.t.classList.contains("tab-group-h")) {
-      group = d.t.dataset.group;
-      const firstOfGroup = info.find((x) => x.group === group && x.name !== dragName);
-      idx = firstOfGroup ? order.indexOf(firstOfGroup.name) : order.length;
-    } else {
-      const target = info.find((x) => x.name === d.t.dataset.name);
-      group = target.group;
-      idx = order.indexOf(target.name) + (d.after ? 1 : 0);
-    }
-    order.splice(idx, 0, dragName);
+    const order = cats().filter((n) => n !== dragName);
+    order.splice(order.indexOf(d.t.dataset.name) + (d.after ? 1 : 0), 0, dragName);
     const name = dragName;
-    await store.saveSettings({ categories: order, categoryGroups: { ...(data.settings.categoryGroups || {}), [name]: group } });
+    await store.saveSettings({ categories: order });
     toast(`${name} taşındı`);
   });
 
@@ -482,10 +507,7 @@ function openTabs() {
     const name = f.get("name").trim();
     if (!name) return;
     if (nameTaken(name)) return toast(`"${name}" adında bir sekme zaten var`);
-    await store.saveSettings({
-      categories: [...cats(), name],
-      categoryGroups: { ...(data.settings.categoryGroups || {}), [name]: f.get("group") },
-    });
+    await store.saveSettings({ categories: [...cats(), name] });
     e.target.elements.name.value = "";
     toast(`${name} sekmesi eklendi`);
   });
@@ -506,17 +528,15 @@ function renderTabs(ui) {
   const info = catInfo();
   const listEl = $("#tabList", ui.el);
   const dnd = matchMedia("(pointer: fine)").matches;
-  listEl.innerHTML = GROUPS.map(([g, label]) => {
-    const list = info.filter((c) => c.group === g);
-    return `<div class="tab-group-h" data-group="${g}">${label}<span>${list.length} sekme</span></div>` +
-      (list.length ? list.map((c, i) => tabRow(c, i, list.length, ui, info, dnd)).join("") : `<div class="tab-empty">Bu grupta sekme yok${dnd ? " — buraya sürükleyin" : ""}</div>`);
-  }).join("");
+  listEl.innerHTML = info.length
+    ? info.map((c, i) => tabRow(c, i, info.length, ui, info, dnd)).join("")
+    : `<div class="tab-empty">Henüz sekme yok — aşağıdan ekleyin.</div>`;
 }
 
 function tabRow(c, i, n, ui, info, dnd) {
   const editing = ui.editing === c.name;
   const others = info.filter((x) => x.name !== c.name);
-  const sameFirst = others.find((x) => x.group === c.group) || others[0];
+  const sameFirst = others[0];
   const name = editing
     ? `<input class="ren" value="${esc(c.name)}" maxlength="40" aria-label="Yeni ad" />`
     : `<b>${esc(c.name)}</b><span class="cnt"> · ${c.count} ürün</span>${c.hidden ? `<span class="badge">gizli</span>` : ""}`;
@@ -534,7 +554,6 @@ function tabRow(c, i, n, ui, info, dnd) {
     <div class="tab-row ${c.hidden ? "is-hidden" : ""}" data-name="${esc(c.name)}" ${dnd && !editing ? 'draggable="true"' : ""}>
       ${dnd ? `<span class="grip" aria-hidden="true">⋮⋮</span>` : ""}
       <div class="tab-name">${name}</div>
-      <select data-group aria-label="Grup">${GROUPS.map(([g, l]) => `<option value="${g}" ${g === c.group ? "selected" : ""}>${l}</option>`).join("")}</select>
       <div class="tab-acts">
         <button type="button" class="ib" data-up title="Yukarı" ${i === 0 ? "disabled" : ""}>↑</button>
         <button type="button" class="ib" data-down title="Aşağı" ${i === n - 1 ? "disabled" : ""}>↓</button>
@@ -545,6 +564,43 @@ function tabRow(c, i, n, ui, info, dnd) {
     </div>${del}
   </div>`;
 }
+
+/* ------------------------- indirim afişleri ------------------------ */
+$("#bannerBtn").onclick = () => {
+  const list = data.items.filter((i) => i.discount).sort((a, b) => a.name.localeCompare(b.name, "tr"));
+  if (!list.length) return toast("İndirimli ürün yok. Ürünü düzenleyip İndirim alanını doldurun.");
+  const m = modal(`
+    <h3>İndirim afişleri</h3>
+    <p class="modal-sub">Afişe basılacak ürünleri ve kâğıt düzenini seçin. Açılan sayfada Yazdır'a basın (PDF olarak da kaydedebilirsiniz).</p>
+    <form id="bn">
+      <div class="banner-pick">${list.map((it) => {
+        const d = normalizeDiscount(it.discount);
+        return `<label class="pick"><input type="checkbox" name="ids" value="${it.id}" checked />
+          <span class="pick-name">${esc(it.name)}${it.active ? "" : ` <span class="badge">pasif</span>`}</span>
+          <span class="pick-price">${priceLabel(it)}</span>
+          <span class="tag disc">${d.type === "pct" ? `%${d.value}` : `−₺${d.value}`}</span></label>`;
+      }).join("")}</div>
+      <div class="field" style="margin-top:14px"><span>Kâğıt düzeni (A4)</span>
+        <div class="seg layout-seg">
+          <label><input type="radio" name="size" value="a4" checked /><span>Büyük afiş<small>1 / sayfa</small></span></label>
+          <label><input type="radio" name="size" value="a5" /><span>Yarım sayfa<small>2 / sayfa</small></span></label>
+          <label><input type="radio" name="size" value="card" /><span>Masa kartı<small>4 / sayfa</small></span></label>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn" data-close>Vazgeç</button>
+        <button class="btn primary" type="submit">⎙ Afişleri hazırla</button>
+      </div>
+    </form>`);
+  $("#bn", m.el).addEventListener("submit", (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const ids = f.getAll("ids");
+    if (!ids.length) return toast("En az bir ürün seçin");
+    window.open(`afis.html?size=${f.get("size")}&ids=${ids.join(",")}`, "_blank");
+    m.close();
+  });
+};
 
 $("#qrBtn").onclick = () => {
   const url = new URL("index.html", location.href).href;

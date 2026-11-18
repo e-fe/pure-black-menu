@@ -10,40 +10,41 @@
 | **Personel paneli** | https://e-fe.github.io/pure-black-menu/admin.html (demo şifresi: `1234`) |
 | **Sunum ekranı** | https://e-fe.github.io/pure-black-menu/sunum.html |
 
-Kafenin içecek ve yiyecek menüsü, masadaki QR kodla açılır ve **canlı güncellenir**.
-Personel panelden biten ürünü tek dokunuşla "Tükendi" yapar, yeni ürün ve sekme ekler;
+Kafenin tatlı menüsü, masadaki QR kodla açılır ve **canlı güncellenir**.
+Personel panelden biten tatlıyı tek dokunuşla "Tükendi" yapar, indirim tanımlar, yeni ürün ve sekme ekler;
 müşterinin telefonundaki menü anında değişir.
 
 | Sayfa | Ne işe yarar |
 |---|---|
 | `index.html` | Müşteri menüsü (telefona göre tasarlandı, koyu tema) |
-| `admin.html` | Personel paneli: ürünler, sekmeler, aktif/pasif, gün sonu, QR, yedek (açık tema) |
+| `admin.html` | Personel paneli: ürünler, indirimler, sekmeler, aktif/pasif, gün sonu, QR, yedek (açık tema) |
+| `afis.html` | İndirim afişleri: A4'e 1, 2 veya 4 afiş; yazdır ya da PDF olarak kaydet |
 | `sunum.html` | Sunum ekranı: solda panel, sağda telefon. Soldaki her değişiklik sağda anında görünür |
 
 ## Özellikler
 
 **Müşteri menüsü**
-- Üstte iki ana sekme: **İÇECEKLER** ve **YİYECEKLER**
-- Altında kaydırılabilir alt sekmeler (Sıcak Kahveler, Soğuk Kahveler, Türk Kahvesi, Çaylar, Bitki Çayları,
-  Sıcak İçecekler, Frozen & Milkshake, Soğuk İçecekler, Tatlılar, Cheesecake, Atıştırmalıklar)
-- Sayfa kaydırıldıkça bulunduğunuz bölümün sekmesi otomatik seçilir
-- **Boyut fiyatları:** kahvelerde `S ₺150 · M ₺170 · L ₺190`, tek fiyatlı ürünler eskisi gibi
+- Kaydırılabilir tatlı sekmeleri (Pastalar & Kekler, Cheesecake, Sütlü Tatlılar, Şerbetli Tatlılar,
+  Dondurma & Waffle, Kurabiye & Kurular); sayfa kaydırıldıkça bulunduğunuz sekme otomatik seçilir
+- **İndirimler:** eski fiyat üstü çizili, yanında yeni fiyat ve "%15 İNDİRİM" / "₺20 İNDİRİM" etiketi
+- İndirimdeki tatlılar menünün en üstünde **"İndirimde"** bölümünde toplanır ve her sekmede de ilk sırada gelir
+- Boyut fiyatları (ör. dondurma kasesi): `S ₺90 · M ₺120 · L ₺150`; indirim her boyuta uygulanır
 - Pasif ürünler "Tükendi" olarak görünür (Ayarlar'dan tamamen gizlenebilir); tüm ürünleri biten sekme gizlenir
-- Gün içinde aktife alınan ürünlerde "Bugün geldi" rozeti, imza ürünler sekmenin en üstünde
+- Gün içinde aktife alınan ürünlerde "Bugün geldi" rozeti, imza ürünler sekmenin üst sıralarında
 - Siyah-beyaz tasarım: Bebas Neue + Inter, emojiler tek renk, fotoğraflar renkli
 
 **Personel paneli**
 - Tek dokunuşla aktif/pasif, sekme bazında "hepsini aç/kapat", **Gün sonu** ile hepsini pasife alma (geri alınabilir)
-- Ürün ekle/düzenle: ad, sekme, fiyat ya da **Küçük/Orta/Büyük fiyatları**, açıklama, simge veya fotoğraf, etiketler
-  (yeni, imza, çok satan, yöresel, sıcak, soğuk, kafeinsiz, laktozsuz seçenek, glutensiz, vegan, şekersiz)
-- **☰ Sekmeler** ekranı:
-  - ↑ ↓ ya da sürükle-bırak ile sıralama
-  - Her sekmenin İçecekler / Yiyecekler grubunu seçme
-  - Yeniden adlandırma (sekmedeki tüm ürünler de yeni ada taşınır)
-  - Gizle / göster (ürünler silinmez)
-  - Silme: boşsa direkt; doluysa "ürünleri başka sekmeye taşı" veya "ürünleriyle sil" — **Geri al** ile geri alınabilir
-  - "＋ Yeni sekme" ile ekleme
-- Arama, sekme ve durum filtresi, istatistik kartları
+- Ürün ekle/düzenle: ad, sekme (listeden seçilir, "＋ Yeni kategori" ile eklenir), fiyat ya da Küçük/Orta/Büyük
+  fiyatları, **indirim**, açıklama, simge veya fotoğraf, etiketler (yeni, imza, çok satan, yöresel, sıcak, soğuk,
+  glutensiz, vegan, şekersiz)
+- **İndirim:** miktar + tür (**% Yüzde** ya da **₺ TL**). Formda eski → yeni fiyat önizlemesi görünür;
+  %100 ve üstü ya da fiyattan büyük TL indirim kaydedilmez. "Kaldır" ile indirim biter
+- **⎙ İndirim afişleri:** indirimli ürünleri seçip A4'e **büyük afiş (1)**, **yarım sayfa (2)** veya **masa kartı (4)**
+  olarak basın. Afişte kafe adı, indirim oranı, ürün, eski/yeni fiyat ve menüye giden QR kod var; kesim çizgili
+- **☰ Sekmeler** ekranı: ↑ ↓ ya da sürükle-bırak ile sıralama, yeniden adlandırma (ürünler de taşınır),
+  gizle / göster, silme (ürünleri taşı ya da ürünleriyle sil — **Geri al** ile geri alınır), "＋ Yeni sekme"
+- Arama, sekme, durum ve **"İndirimde"** filtresi, istatistik kartları
 - Masa QR kodu üretme ve yazdırma, JSON yedek alma / yükleme
 - Kurulum gerektirmez: saf HTML/CSS/JS, GitHub Pages'te ücretsiz çalışır
 
@@ -64,13 +65,15 @@ müşterinin telefonundaki menü anında değişir.
 ## 2) Sunum akışı (önerilen)
 
 1. `sunum.html`'i açın, tam ekran yapın (F11). Soldaki panele **1234** ile girin
-2. Sağdaki telefonda **İÇECEKLER / YİYECEKLER** arasında geçin, aşağı kaydırıp sekmelerin kendiliğinden seçildiğini gösterin
-3. Soldan **Latte**'nin anahtarını kapatın → telefonda **anında "Tükendi"**. Tekrar açın → **"Bugün geldi"** rozetiyle geri gelir
-4. **＋ Ürün ekle** → "Fındıklı Latte" → **Boyut fiyatları kullan** → S 160 / M 180 / L 200 → telefonda `S · M · L` fiyatlarıyla belirir
-5. **☰ Sekmeler** → "Kahvaltı" sekmesi ekleyin (Yiyecekler), içine bir ürün koyun → telefonda yeni sekme çıkar.
+2. Sağdaki telefonda en üstteki **"İndirimde"** bölümünü gösterin: eski fiyat çizili, yeni fiyat yanında.
+   Aşağı kaydırıp sekmelerin kendiliğinden seçildiğini gösterin
+3. Soldan **Tiramisu**'nun anahtarını kapatın → telefonda **anında "Tükendi"**. Tekrar açın → **"Bugün geldi"** rozetiyle geri gelir
+4. **Waffle** → ✎ → İndirim: **25 / % Yüzde** → formda `₺220 → ₺165` görünür → Kaydet → telefonda en üste çıkar
+5. **⎙ İndirim afişleri** → ürünleri seçin → **Masa kartı** → açılan sayfada **Yazdır / PDF**
+6. **☰ Sekmeler** → yeni bir sekme ekleyin, içine ürün koyun → telefonda yeni sekme çıkar.
    Sonra yeniden adlandırın, gizleyin, silin → **Geri al**
-6. **Gün sonu** → hepsi kapanır → toast'taki **Geri al** ile geri gelir
-7. **QR kod** → masaya konacak kodu gösterin; telefonunuzla okutup menünün mobil halini gösterin
+7. **Gün sonu** → hepsi kapanır → toast'taki **Geri al** ile geri gelir
+8. **QR kod** → masaya konacak kodu gösterin; telefonunuzla okutup menünün mobil halini gösterin
 
 > ⚠️ **Demo modu:** Varsayılan olarak veriler tarayıcıda saklanır. Aynı tarayıcıdaki sekmeler/sunum ekranı
 > birbirini canlı görür, fakat **başka bir telefon değişiklikleri görmez**. Kafede kullanmak için Canlı Mod'u açın.
@@ -104,13 +107,15 @@ Sekme yeniden adlandırma, taşıma ve silme işlemleri Firestore'a tek bir topl
 index.html      müşteri menüsü
 admin.html      personel paneli
 sunum.html      sunum ekranı (panel + telefon yan yana)
+afis.html       indirim afişleri (yazdır / PDF)
 favicon.svg     PB logosu
 css/style.css   tüm stiller (koyu menü, açık panel)
 js/config.js    Firebase ayarı + demo şifresi
-js/store.js     veri katmanı (localStorage veya Firestore), sekme işlemleri
-js/seed.js      örnek menü (81 ürün), sekmeler ve varsayılan ayarlar
+js/store.js     veri katmanı (localStorage veya Firestore), sekme işlemleri, indirim hesabı
+js/seed.js      örnek tatlı menüsü (32 ürün), sekmeler ve varsayılan ayarlar
 js/menu.js      müşteri menüsü mantığı
 js/admin.js     panel mantığı
+js/afis.js      afiş sayfası mantığı
 ```
 
 ## Not

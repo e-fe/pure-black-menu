@@ -21,6 +21,25 @@ export function normalizeSizes(sz) {
   return Object.keys(out).length ? out : null;
 }
 
+// İndirim: { type: "tl" | "pct", value } ya da null.
+//  - pct: 1–99 arası yüzde
+//  - tl : fiyattan düşülecek tutar (fiyatın altında kalmalı)
+export function normalizeDiscount(d) {
+  if (!d || typeof d !== "object") return null;
+  const type = d.type === "tl" ? "tl" : "pct";
+  const value = Math.round(Number(d.value) * 100) / 100;
+  if (!(value > 0)) return null;
+  if (type === "pct" && value >= 100) return null;
+  return { type, value };
+}
+// İndirimli fiyat (tam liraya yuvarlanır, 0'ın altına inmez)
+export function discounted(price, d) {
+  if (!d) return price;
+  const p = d.type === "tl" ? price - d.value : price * (1 - d.value / 100);
+  return Math.max(0, Math.round(p));
+}
+export const discountLabel = (d) => (d.type === "tl" ? `₺${d.value.toLocaleString("tr-TR")} indirim` : `%${d.value.toLocaleString("tr-TR")} indirim`);
+
 export function normalizeItem(it) {
   const sizes = normalizeSizes(it.sizes);
   return {
@@ -29,6 +48,7 @@ export function normalizeItem(it) {
     category: it.category || "Tatlılar",
     price: sizes ? (sizes.m ?? sizes.s ?? sizes.l) : Number(it.price) || 0,
     sizes,
+    discount: normalizeDiscount(it.discount),
     desc: String(it.desc || "").trim(),
     emoji: it.emoji || "🍰",
     image: it.image || "",
@@ -43,50 +63,38 @@ export function normalizeItem(it) {
 /* ------------------------------------------------------------------ */
 /*  Sekmeler (kategoriler)                                             */
 /* ------------------------------------------------------------------ */
-export const GROUPS = [["drinks", "İçecekler"], ["food", "Yiyecekler"]];
-export const groupOf = (settings, name) => (settings.categoryGroups || {})[name] === "drinks" ? "drinks" : "food";
-
-// Sıralı sekme listesi: önce İçecekler, sonra Yiyecekler; her grupta ayardaki sıra.
-// Ayarda olmayan ama ürünlerde geçen kategoriler sona eklenir.
+// Sıralı sekme listesi: ayardaki sıra; ayarda olmayan ama ürünlerde geçen kategoriler sona eklenir.
 export function categoryList(settings, items) {
   const order = settings.categories || [];
   const present = [...new Set(items.map((i) => i.category))];
   const hidden = settings.hiddenCategories || [];
   const all = [...order, ...present.filter((c) => !order.includes(c))];
-  const list = all.map((name) => ({
+  return all.map((name) => ({
     name,
-    group: groupOf(settings, name),
     hidden: hidden.includes(name),
     count: items.filter((i) => i.category === name).length,
   }));
-  return GROUPS.flatMap(([g]) => list.filter((c) => c.group === g));
 }
 
 // Sekme ayarlarını bir sekmeden diğerine taşır / siler (saf fonksiyonlar)
 function settingsRename(s, from, to) {
-  const groups = { ...(s.categoryGroups || {}) };
-  if (from in groups) { if (!(to in groups)) groups[to] = groups[from]; delete groups[from]; }
   const uniq = (arr) => [...new Set(arr)];
   return {
     categories: uniq((s.categories || []).map((c) => (c === from ? to : c))),
     hiddenCategories: uniq((s.hiddenCategories || []).map((c) => (c === from ? to : c))),
-    categoryGroups: groups,
   };
 }
 function settingsRemove(s, name) {
-  const groups = { ...(s.categoryGroups || {}) };
-  delete groups[name];
   return {
     categories: (s.categories || []).filter((c) => c !== name),
     hiddenCategories: (s.hiddenCategories || []).filter((c) => c !== name),
-    categoryGroups: groups,
   };
 }
 
 /* ------------------------------------------------------------------ */
 /*  LocalStore                                                         */
 /* ------------------------------------------------------------------ */
-const KEY = "pureblack-menu-v2";
+const KEY = "pureblack-menu-v3"; // v3: yalnızca tatlı menüsü + indirimler
 const AUTH_KEY = "pureblack-menu-auth";
 
 class LocalStore {
@@ -123,6 +131,7 @@ class LocalStore {
       if (!it) return;
       if ("active" in patch && patch.active && !it.active) patch.activatedAt = Date.now();
       if ("sizes" in patch) patch.sizes = normalizeSizes(patch.sizes);
+      if ("discount" in patch) patch.discount = normalizeDiscount(patch.discount);
       Object.assign(it, patch, { updatedAt: Date.now() });
     });
   }
@@ -215,6 +224,7 @@ class FirebaseStore {
     const cur = this.#items.find((x) => x.id === id);
     if ("active" in patch && patch.active && cur && !cur.active) patch.activatedAt = Date.now();
     if ("sizes" in patch) patch.sizes = normalizeSizes(patch.sizes);
+    if ("discount" in patch) patch.discount = normalizeDiscount(patch.discount);
     await this.fs.updateDoc(this.fs.doc(this.col, id), { ...patch, updatedAt: Date.now() });
   }
   async deleteItem(id) { await this.fs.deleteDoc(this.fs.doc(this.col, id)); }
