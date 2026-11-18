@@ -216,6 +216,40 @@ function modal(html) {
   return { el: bd, close };
 }
 
+/* ------------------------- fotoğraf küçültme ----------------------- */
+const isDataUrl = (s) => typeof s === "string" && s.startsWith("data:");
+// Seçilen fotoğrafı en uzun kenarı 800px olacak şekilde küçültüp JPEG'e çevirir (~60–140 KB)
+async function compressImage(file, maxSide = 800, maxBytes = 140_000) {
+  if (!file.type.startsWith("image/") && !/\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name)) throw new Error("Bu dosya bir fotoğraf değil.");
+  let src;
+  try {
+    src = await createImageBitmap(file, { imageOrientation: "from-image" });
+  } catch {
+    src = await new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.onerror = () => rej(new Error("Bu fotoğraf açılamadı. Farklı bir fotoğraf ya da JPEG/PNG deneyin."));
+      img.src = URL.createObjectURL(file);
+    });
+  }
+  const sw = src.width, sh = src.height;
+  const k = Math.min(1, maxSide / Math.max(sw, sh));
+  const w = Math.round(sw * k), h = Math.round(sh * k);
+  const c = Object.assign(document.createElement("canvas"), { width: w, height: h });
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, w, h); // şeffaf PNG'ler beyaz zemine
+  ctx.drawImage(src, 0, 0, w, h);
+  src.close?.();
+  let q = 0.82, url = c.toDataURL("image/jpeg", q);
+  while (url.length > maxBytes * 1.37 && q > 0.45) { q -= 0.08; url = c.toDataURL("image/jpeg", q); }
+  return { url, w, h, kb: Math.round((url.length * 3) / 4 / 1024) };
+}
+
+// Hafıza dolduğunda (ör. anahtar/ayar değişikliği) anlaşılır uyarı
+window.addEventListener("unhandledrejection", (e) => {
+  if (e.reason?.quota) { e.preventDefault(); toast("Tarayıcı hafızası doldu: değişiklik kaydedilemedi. Bazı fotoğrafları kaldırın."); }
+});
+
 const NEW_CAT = "__new__";
 // Kategori seçimi: Sekmeler sırasındaki liste + en altta "Yeni kategori"
 function categoryOptions(selected) {
@@ -259,7 +293,19 @@ function openEditor(it = null) {
       </div>
       <label class="field"><span>Açıklama</span><textarea name="desc" maxlength="160" placeholder="İçerik, servis şekli…">${esc(v.desc)}</textarea></label>
       <div class="field"><span>Simge</span><div class="emojis" id="emo">${EMOJIS.map((e) => `<button type="button" class="${e === v.emoji ? "on" : ""}">${e}</button>`).join("")}</div></div>
-      <label class="field"><span>Fotoğraf bağlantısı (isteğe bağlı — simgenin yerine geçer)</span><input name="image" type="url" value="${esc(v.image)}" placeholder="https://…" /></label>
+      <div class="field"><span>Fotoğraf (isteğe bağlı — simgenin yerine geçer)</span>
+        <div class="photo-row">
+          <div class="photo-prev" id="photoPrev"></div>
+          <div class="photo-acts">
+            <div class="photo-btns">
+              <label class="btn sm">＋ Galeriden / dosyadan seç<input type="file" id="photoFile" accept="image/*" hidden /></label>
+              <button type="button" class="btn sm ghost danger" id="photoClear">Kaldır</button>
+            </div>
+            <input name="image" type="url" value="${esc(isDataUrl(v.image) ? "" : v.image)}" placeholder="ya da bağlantı yapıştırın: https://…" aria-label="Fotoğraf bağlantısı" />
+            <div class="photo-info" id="photoInfo"></div>
+          </div>
+        </div>
+      </div>
       <div class="field"><span>Etiketler</span><div class="checks">${TAGS.map((t) => `<label><input type="checkbox" name="tags" value="${t}" ${v.tags?.includes(t) ? "checked" : ""}/>${t}</label>`).join("")}</div></div>
       <label class="inline"><span class="switch"><input type="checkbox" name="active" ${v.active ? "checked" : ""}/><span></span></span> Hemen menüde göster</label>
       <div class="actions">
@@ -268,10 +314,43 @@ function openEditor(it = null) {
       </div>
     </form>`);
   let emoji = v.emoji;
+  let image = v.image || "";
+  // Fotoğraf önizlemesi ve seçimi
+  const syncPhoto = () => {
+    $("#photoPrev", m.el).innerHTML = image ? `<img src="${esc(image)}" alt="" />` : `<span>${esc(emoji)}</span>`;
+    $("#photoClear", m.el).hidden = !image;
+    const img = $("#photoPrev img", m.el);
+    if (img && !isDataUrl(image)) img.onerror = () => {
+      const info = $("#photoInfo", m.el);
+      info.classList.add("err"); info.textContent = "Bu bağlantıdaki fotoğraf açılamadı. Bağlantıyı kontrol edin ya da galeriden seçin.";
+    };
+  };
+  $("#photoFile", m.el).addEventListener("change", async (e) => {
+    const file = e.target.files[0]; e.target.value = "";
+    if (!file) return;
+    const info = $("#photoInfo", m.el);
+    info.classList.remove("err"); info.textContent = "Fotoğraf küçültülüyor…";
+    try {
+      const r = await compressImage(file);
+      image = r.url;
+      form.elements.image.value = "";
+      info.textContent = `Fotoğraf eklendi · ${r.w}×${r.h} · ${r.kb} KB`;
+      syncPhoto();
+    } catch (err) {
+      info.classList.add("err"); info.textContent = err.message;
+    }
+  });
+  $("#photoClear", m.el).onclick = () => { image = ""; form.elements.image.value = ""; $("#photoInfo", m.el).textContent = ""; syncPhoto(); };
+  $("[name=image]", m.el).addEventListener("input", (e) => {
+    image = e.target.value.trim();
+    const info = $("#photoInfo", m.el); info.textContent = ""; info.classList.remove("err");
+    syncPhoto();
+  });
   $("#emo", m.el).addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b) return;
     emoji = b.textContent;
     $("#emo", m.el).querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+    syncPhoto();
   });
   const sizeToggle = $("[name=useSizes]", m.el);
   const syncSizes = () => {
@@ -313,6 +392,7 @@ function openEditor(it = null) {
       ? prices.map(([l, p]) => `${l ? `<b>${l}</b> ` : ""}<s>${tl(p)}</s> → <strong>${tl(discounted(p, d))}</strong>`).join(" · ") + ` <em>(${esc(discountLabel(d))})</em>`
       : `${esc(discountLabel(d))} — fiyat girince yeni fiyat burada görünür`;
   };
+  syncPhoto();
   form.addEventListener("input", syncDisc);
   form.addEventListener("change", syncDisc);
   $("#discClear", m.el).onclick = () => { form.elements.discValue.value = ""; syncDisc(); };
@@ -351,11 +431,16 @@ function openEditor(it = null) {
     const out = {
       name: f.get("name").trim(), category,
       price: sizes ? (sizes.m ?? sizes.s ?? sizes.l) : Number(f.get("price")), sizes, discount,
-      desc: f.get("desc").trim(), image: f.get("image").trim(), emoji,
+      desc: f.get("desc").trim(), image, emoji,
       tags: f.getAll("tags"), active: f.get("active") === "on",
     };
-    if (editing) await store.updateItem(it.id, out);
-    else await store.addItem(out);
+    try {
+      if (editing) await store.updateItem(it.id, out);
+      else await store.addItem(out);
+    } catch (err) {
+      if (err.quota) return toast("Tarayıcı hafızası doldu: fotoğraf kaydedilemedi. Bazı ürünlerin fotoğrafını kaldırın ya da bağlantı kullanın.");
+      throw err;
+    }
     m.close();
     toast(editing ? `${out.name} güncellendi` : `${out.name} eklendi${out.active ? " ve menüde" : ""}`);
   });

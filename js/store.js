@@ -112,7 +112,13 @@ class LocalStore {
     try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; }
   }
   #write(data, broadcast = true) {
-    localStorage.setItem(KEY, JSON.stringify(data));
+    try {
+      localStorage.setItem(KEY, JSON.stringify(data));
+    } catch (e) {
+      // Tarayıcı hafızası doldu (çoğunlukla çok sayıda fotoğraf): hiçbir şey kaydedilmez
+      if (e?.name === "QuotaExceededError" || e?.code === 22) throw Object.assign(new Error("QUOTA"), { quota: true });
+      throw e;
+    }
     this.#emit();
     if (broadcast) this.#chan?.postMessage("changed");
   }

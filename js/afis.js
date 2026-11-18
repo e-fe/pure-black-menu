@@ -8,6 +8,7 @@ const tl = (n) => "₺" + Number(n).toLocaleString("tr-TR", { maximumFractionDig
 const params = new URLSearchParams(location.search);
 const PER_PAGE = { a4: 1, a5: 2, card: 4 };
 let size = PER_PAGE[params.get("size")] ? params.get("size") : "a4";
+let photo = params.get("photo") === "bw" ? "bw" : "color"; // afişteki fotoğraf: renkli / siyah-beyaz
 const ids = (params.get("ids") || "").split(",").filter(Boolean); // boşsa tüm indirimli ürünler
 const menuUrl = new URL("index.html", location.href).href;
 const qr = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&data=${encodeURIComponent(menuUrl)}`;
@@ -19,12 +20,13 @@ function banner(it, settings) {
   const prices = sz ? SIZE_KEYS.filter(([k]) => sz[k]).map(([k, l]) => [l, sz[k]]) : [["", it.price]];
   const amount = d.type === "pct" ? `%${d.value.toLocaleString("tr-TR")}` : `₺${d.value.toLocaleString("tr-TR")}`;
   return `
-    <article class="banner">
+    <article class="banner ${it.image ? "has-photo" : ""}">
       <header class="b-head">
         <div class="b-brand">${esc(settings.cafeName.toLocaleUpperCase("tr"))}</div>
         <div class="b-loc">${esc((settings.tagline || "").toLocaleUpperCase("tr"))}</div>
       </header>
       <div class="b-body">
+        ${it.image ? `<div class="b-photo"><img src="${esc(it.image)}" alt="" /></div>` : ""}
         <div class="b-deal"><span class="b-amount">${amount}</span><span class="b-word">İNDİRİM</span></div>
         <div class="b-info">
           <div class="b-name">${esc(it.name.toLocaleUpperCase("tr"))}</div>
@@ -45,6 +47,9 @@ function render(data) {
     .sort((a, b) => (ids.length ? ids.indexOf(a.id) - ids.indexOf(b.id) : a.name.localeCompare(b.name, "tr")));
 
   [...$("#sizeSeg").children].forEach((b) => b.classList.toggle("on", b.dataset.s === size));
+  [...$("#photoSeg").children].forEach((b) => b.classList.toggle("on", b.dataset.p === photo));
+  document.body.classList.toggle("photo-bw", photo === "bw");
+  $("#photoSeg").hidden = !list.some((it) => it.image);
   const per = PER_PAGE[size];
   const pages = Math.ceil(list.length / per);
   $("#info").textContent = list.length ? `${list.length} afiş · ${pages} sayfa` : "";
@@ -66,6 +71,14 @@ $("#sizeSeg").addEventListener("click", (e) => {
   const b = e.target.closest("button"); if (!b) return;
   size = b.dataset.s;
   params.set("size", size);
+  history.replaceState(null, "", `?${params}`);
+  if (last) render(last);
+});
+
+$("#photoSeg").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  photo = b.dataset.p;
+  params.set("photo", photo);
   history.replaceState(null, "", `?${params}`);
   if (last) render(last);
 });

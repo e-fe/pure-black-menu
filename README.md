@@ -38,10 +38,14 @@ müşterinin telefonundaki menü anında değişir.
 - Ürün ekle/düzenle: ad, sekme (listeden seçilir, "＋ Yeni kategori" ile eklenir), fiyat ya da Küçük/Orta/Büyük
   fiyatları, **indirim**, açıklama, simge veya fotoğraf, etiketler (yeni, imza, çok satan, yöresel, sıcak, soğuk,
   glutensiz, vegan, şekersiz)
+- **Fotoğraf:** "＋ Galeriden / dosyadan seç" ile telefon galerisinden, kameradan ya da bilgisayardan eklenir.
+  Fotoğraf tarayıcıda otomatik küçültülür (en uzun kenar 800 px, ~60–140 KB JPEG); istenirse bağlantı da yapıştırılabilir.
+  Demo modunda fotoğraflar tarayıcı hafızasında durur (yaklaşık 40–60 fotoğraf); dolunca uyarı çıkar, veri bozulmaz
 - **İndirim:** miktar + tür (**% Yüzde** ya da **₺ TL**). Formda eski → yeni fiyat önizlemesi görünür;
   %100 ve üstü ya da fiyattan büyük TL indirim kaydedilmez. "Kaldır" ile indirim biter
 - **⎙ İndirim afişleri:** indirimli ürünleri seçip A4'e **büyük afiş (1)**, **yarım sayfa (2)** veya **masa kartı (4)**
-  olarak basın. Afişte kafe adı, indirim oranı, ürün, eski/yeni fiyat ve menüye giden QR kod var; kesim çizgili
+  olarak basın. Afişte kafe adı, indirim oranı, ürün, eski/yeni fiyat ve menüye giden QR kod var; kesim çizgili.
+  Ürünün fotoğrafı varsa afişte de çıkar; afiş sayfasından **renkli** ya da **siyah-beyaz** seçilebilir
 - **☰ Sekmeler** ekranı: ↑ ↓ ya da sürükle-bırak ile sıralama, yeniden adlandırma (ürünler de taşınır),
   gizle / göster, silme (ürünleri taşı ya da ürünleriyle sil — **Geri al** ile geri alınır), "＋ Yeni sekme"
 - Arama, sekme, durum ve **"İndirimde"** filtresi, istatistik kartları
@@ -69,11 +73,12 @@ müşterinin telefonundaki menü anında değişir.
    Aşağı kaydırıp sekmelerin kendiliğinden seçildiğini gösterin
 3. Soldan **Tiramisu**'nun anahtarını kapatın → telefonda **anında "Tükendi"**. Tekrar açın → **"Bugün geldi"** rozetiyle geri gelir
 4. **Waffle** → ✎ → İndirim: **25 / % Yüzde** → formda `₺220 → ₺165` görünür → Kaydet → telefonda en üste çıkar
-5. **⎙ İndirim afişleri** → ürünleri seçin → **Masa kartı** → açılan sayfada **Yazdır / PDF**
-6. **☰ Sekmeler** → yeni bir sekme ekleyin, içine ürün koyun → telefonda yeni sekme çıkar.
+5. **San Sebastian** → ✎ → **＋ Galeriden / dosyadan seç** ile fotoğraf ekleyin → menüde ve afişte görünür
+6. **⎙ İndirim afişleri** → ürünleri seçin → **Masa kartı** → açılan sayfada **Yazdır / PDF**
+7. **☰ Sekmeler** → yeni bir sekme ekleyin, içine ürün koyun → telefonda yeni sekme çıkar.
    Sonra yeniden adlandırın, gizleyin, silin → **Geri al**
-7. **Gün sonu** → hepsi kapanır → toast'taki **Geri al** ile geri gelir
-8. **QR kod** → masaya konacak kodu gösterin; telefonunuzla okutup menünün mobil halini gösterin
+8. **Gün sonu** → hepsi kapanır → toast'taki **Geri al** ile geri gelir
+9. **QR kod** → masaya konacak kodu gösterin; telefonunuzla okutup menünün mobil halini gösterin
 
 > ⚠️ **Demo modu:** Varsayılan olarak veriler tarayıcıda saklanır. Aynı tarayıcıdaki sekmeler/sunum ekranı
 > birbirini canlı görür, fakat **başka bir telefon değişiklikleri görmez**. Kafede kullanmak için Canlı Mod'u açın.
