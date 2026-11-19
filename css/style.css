@@ -154,8 +154,67 @@ a { color: inherit; }
 .price.on-sale .now { font-size: 26px; }
 .sizes.on-sale s { color: var(--muted); font-weight: 400; margin-right: 4px; }
 .card.on-sale { border-color: var(--line-strong); }
-.chip.sale:not(.on) { border-color: var(--text); color: var(--text); font-weight: 600; }
-.sale-section h2::before { content: "%"; margin-right: 2px; }
+/* İndirim vitrini (başlığın altında kayan banner) */
+.promo { position: relative; margin: 2px 0 14px; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+.promo[hidden] { display: none; }
+.promo-track {
+  display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+  overscroll-behavior-x: contain; outline: none;
+}
+.promo-track::-webkit-scrollbar { display: none; }
+.promo-track:focus-visible { box-shadow: inset 0 0 0 2px var(--text); }
+.promo-slide {
+  position: relative; flex: 0 0 100%; scroll-snap-align: start; scroll-snap-stop: always;
+  height: clamp(168px, 46vw, 230px); cursor: pointer; overflow: hidden; user-select: none;
+  display: flex; align-items: center;
+}
+/* Fotoğraf: kırpılarak doldurur, asla esnemez; yazı tarafı koyu geçişle okunur kalır */
+.promo-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.promo-slide.has-photo::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(10,10,10,.92) 0%, rgba(10,10,10,.72) 42%, rgba(10,10,10,.15) 78%, rgba(10,10,10,0) 100%);
+}
+.promo-emoji {
+  position: absolute; right: -2%; top: 50%; transform: translateY(-50%) rotate(-8deg);
+  font-size: clamp(110px, 32vw, 170px); line-height: 1; opacity: .22; filter: grayscale(1) contrast(1.1);
+}
+.promo-text { position: relative; z-index: 1; padding: 18px 22px 30px; max-width: 70%; }
+.promo-badge {
+  display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  background: #fafafa; color: #0a0a0a; padding: 3px 8px; border-radius: 4px;
+}
+.promo-amount { font-family: var(--display); font-size: clamp(52px, 15vw, 76px); line-height: .9; margin-top: 8px; letter-spacing: .01em; color: #fafafa; }
+.promo-name { margin: 2px 0 6px; font-size: 17px; font-weight: 600; color: #fafafa; line-height: 1.2; }
+.promo-price { display: flex; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; }
+.promo-price s { font-size: 13px; color: #a3a3a3; }
+.promo-price b { font-family: var(--display); font-weight: 400; font-size: 26px; letter-spacing: .03em; color: #fafafa; }
+/* Noktalar: yarı saydam zemin, görüntüyü kapatmaz */
+.promo-dots {
+  position: absolute; left: 50%; bottom: 9px; transform: translateX(-50%); z-index: 2;
+  display: flex; gap: 2px; padding: 3px 5px; border-radius: 99px;
+  background: rgba(10,10,10,.28); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.promo-dots:empty { display: none; }
+.promo-dots button { width: 18px; height: 14px; padding: 0; border: 0; background: none; display: grid; place-items: center; cursor: pointer; }
+.promo-dots button::before {
+  content: ""; width: 6px; height: 6px; border-radius: 99px; background: rgba(250,250,250,.45);
+  transition: width .25s, background .25s;
+}
+.promo-dots button.on::before { width: 16px; background: #fafafa; }
+.promo-dots button:focus-visible { outline: 2px solid #fafafa; outline-offset: -2px; border-radius: 99px; }
+/* Oklar: yalnızca fareyle kullanılan ekranlarda, üzerine gelince */
+.promo-nav {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; display: none;
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(250,250,250,.25);
+  background: rgba(10,10,10,.45); color: #fafafa; font-size: 22px; line-height: 1; padding-bottom: 3px;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; transition: opacity .2s;
+}
+.promo-nav.prev { left: 10px; } .promo-nav.next { right: 10px; }
+@media (hover: hover) and (pointer: fine) {
+  .promo-nav { display: grid; place-items: center; }
+  .promo:hover .promo-nav, .promo-nav:focus-visible { opacity: 1; }
+}
+.promo.single .promo-nav { display: none; }
 
 .card.out { opacity: .5; box-shadow: none; background: transparent; }
 .card.out .thumb { filter: grayscale(1); }

@@ -1,11 +1,11 @@
 import { createStore, isToday, normalizeSizes, SIZE_KEYS, categoryList, normalizeDiscount, discounted } from "./store.js";
+import { createPromo } from "./promo.js";
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const tl = (n) => "₺" + Number(n).toLocaleString("tr-TR", { maximumFractionDigits: 2 });
 const cap = (s) => s.charAt(0).toLocaleUpperCase("tr") + s.slice(1);
 const slug = (s) => "c-" + s.toLocaleLowerCase("tr").replace(/[^a-z0-9ğüşıöç]+/gi, "-");
-const SALE = "İndirimde"; // en üstteki indirim bölümünün adı
 
 $("#date").textContent = new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long" });
 
@@ -15,6 +15,17 @@ let observer = null;
 let lockUntil = 0;     // çipe tıklayınca kaydırma bitene kadar gözlemciyi sustur
 
 const store = await createStore();
+// İndirim vitrini: bannera dokununca ürünün kendi sekmesindeki kartına git
+const promo = createPromo($("#promo"), {
+  onSelect: (id) => {
+    const el = document.querySelector(`#menu .card[data-id="${id}"]`);
+    if (!el) return;
+    lockScrollSpy();
+    setActive(el.closest(".section").dataset.c);
+    window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - navH() - 12, behavior: "smooth" });
+    el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+  },
+});
 
 const onSale = (it) => it.active && !!normalizeDiscount(it.discount);
 // Sıralama: aktif → indirimli → imza → ada göre
@@ -30,13 +41,9 @@ function render(data) {
   const hidden = new Set(settings.hiddenCategories || []);
   const visible = items.filter((it) => (it.active || settings.showSoldOut) && !hidden.has(it.category));
   const cats = categoryList(settings, items).filter((c) => !c.hidden && visible.some((i) => i.category === c.name));
-  const sale = visible.filter(onSale).sort(sortItems);
-
-  // Bölümler: varsa en üstte "İndirimde", sonra sekmeler
-  const sections = [
-    ...(sale.length ? [{ name: SALE, list: sale, sale: true }] : []),
-    ...cats.map((c) => ({ name: c.name, list: visible.filter((i) => i.category === c.name).sort(sortItems) })),
-  ];
+  // İndirimdekiler başlığın altındaki vitrinde; sekmelerin içinde de ilk sırada
+  promo.update(visible.filter(onSale).sort((a, b) => a.name.localeCompare(b.name, "tr")));
+  const sections = cats.map((c) => ({ name: c.name, list: visible.filter((i) => i.category === c.name).sort(sortItems) }));
 
   $("#menuNav").classList.toggle("hidden", !sections.length);
   if (!sections.length) {
@@ -47,17 +54,17 @@ function render(data) {
 
   $("#chips").innerHTML = sections.map((s) => {
     const n = s.list.filter((i) => i.active).length;
-    return `<button class="chip ${s.sale ? "sale" : ""} ${s.name === activeCat ? "on" : ""}" data-c="${esc(s.name)}">${esc(s.name)}<span class="n">${n}</span></button>`;
+    return `<button class="chip ${s.name === activeCat ? "on" : ""}" data-c="${esc(s.name)}">${esc(s.name)}<span class="n">${n}</span></button>`;
   }).join("");
 
   $("#menu").innerHTML = sections.map((s) =>
-    `<section class="section ${s.sale ? "sale-section" : ""}" id="${slug(s.name)}" data-c="${esc(s.name)}"><h2>${esc(s.name)}</h2>${s.list.map(card).join("")}</section>`
+    `<section class="section" id="${slug(s.name)}" data-c="${esc(s.name)}"><h2>${esc(s.name)}</h2>${s.list.map(card).join("")}</section>`
   ).join("");
 
   // Yeni açılan/kapanan ürünü vurgula
   items.forEach((it) => {
     if (prev.has(it.id) && prev.get(it.id) !== it.active) {
-      document.querySelectorAll(`[data-id="${it.id}"]`).forEach((el) => el.classList.add("flash"));
+      document.querySelectorAll(`#menu [data-id="${it.id}"]`).forEach((el) => el.classList.add("flash"));
     }
   });
   prev = new Map(items.map((i) => [i.id, i.active]));
@@ -111,13 +118,26 @@ function observe() {
   sectionEls().forEach((s) => observer.observe(s));
 }
 
-// Sayfanın en altına inildiğinde son (kısa) bölüm şeride hiç giremeyebilir
+// Konumdan aktif bölümü hesapla (gözlemcinin kaçırdığı uç durumlar ve kilit sonrası için)
+// En üstte ilk bölüm henüz şeride girmemiştir; en altta son (kısa) bölüm hiç giremeyebilir
+function syncActive() {
+  const secs = sectionEls(); if (!secs.length) return;
+  const bandBottom = innerHeight * 0.45;
+  if (secs[0].getBoundingClientRect().top > bandBottom) return setActive(secs[0].dataset.c);
+  if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) return setActive(secs.at(-1).dataset.c);
+  const cur = [...secs].reverse().find((s) => s.getBoundingClientRect().top <= bandBottom);
+  if (cur) setActive(cur.dataset.c);
+}
+// Programla kaydırırken çip takibini kısa süre kilitle, kilit bitince konumu yeniden oku
+function lockScrollSpy(ms = 900) {
+  lockUntil = Date.now() + ms;
+  clearTimeout(lockScrollSpy.t);
+  lockScrollSpy.t = setTimeout(syncActive, ms + 50);
+}
 window.addEventListener("scroll", () => {
   if (Date.now() < lockUntil) return;
-  if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) {
-    const s = sectionEls().at(-1);
-    if (s) setActive(s.dataset.c);
-  }
+  const secs = sectionEls();
+  if (secs.length && (secs[0].getBoundingClientRect().top > innerHeight * 0.45 || innerHeight + scrollY >= document.documentElement.scrollHeight - 4)) syncActive();
 }, { passive: true });
 
 function setActive(name) {
@@ -134,7 +154,7 @@ $("#chips").addEventListener("click", (e) => {
   if (!b) return;
   const s = sectionEls().find((x) => x.dataset.c === b.dataset.c);
   if (!s) return;
-  lockUntil = Date.now() + 900;
+  lockScrollSpy();
   setActive(b.dataset.c);
   window.scrollTo({ top: s.getBoundingClientRect().top + scrollY - navH() - 8, behavior: "smooth" });
 });

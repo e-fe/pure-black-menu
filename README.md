@@ -26,8 +26,13 @@ müşterinin telefonundaki menü anında değişir.
 **Müşteri menüsü**
 - Kaydırılabilir tatlı sekmeleri (Pastalar & Kekler, Cheesecake, Sütlü Tatlılar, Şerbetli Tatlılar,
   Dondurma & Waffle, Kurabiye & Kurular); sayfa kaydırıldıkça bulunduğunuz sekme otomatik seçilir
-- **İndirimler:** eski fiyat üstü çizili, yanında yeni fiyat ve "%15 İNDİRİM" / "₺20 İNDİRİM" etiketi
-- İndirimdeki tatlılar menünün en üstünde **"İndirimde"** bölümünde toplanır ve her sekmede de ilk sırada gelir
+- **İndirim vitrini:** PURE BLACK başlığının hemen altında indirimdeki tatlılar banner olarak kayar.
+  Kendiliğinden geçer (4,5 sn), telefonda parmakla, masaüstünde ‹ › oklarıyla ya da klavyeyle elle geçirilir;
+  dokunulunca otomatik geçiş birkaç saniye bekler. Alttaki yarı saydam noktalar kaçıncı bannerda olunduğunu
+  gösterir, noktaya dokununca o bannera gidilir. Fotoğrafı olan ürünün fotoğrafı bannerı doldurur (esnemez);
+  bannera dokununca ürünün menüdeki kartına gidilir
+- **İndirimler:** kartlarda eski fiyat üstü çizili, yanında yeni fiyat ve "%15 İNDİRİM" / "₺20 İNDİRİM" etiketi;
+  indirimli tatlılar kendi sekmelerinde ilk sırada gelir
 - Boyut fiyatları (ör. dondurma kasesi): `S ₺90 · M ₺120 · L ₺150`; indirim her boyuta uygulanır
 - Pasif ürünler "Tükendi" olarak görünür (Ayarlar'dan tamamen gizlenebilir); tüm ürünleri biten sekme gizlenir
 - Gün içinde aktife alınan ürünlerde "Bugün geldi" rozeti, imza ürünler sekmenin üst sıralarında
@@ -69,10 +74,10 @@ müşterinin telefonundaki menü anında değişir.
 ## 2) Sunum akışı (önerilen)
 
 1. `sunum.html`'i açın, tam ekran yapın (F11). Soldaki panele **1234** ile girin
-2. Sağdaki telefonda en üstteki **"İndirimde"** bölümünü gösterin: eski fiyat çizili, yeni fiyat yanında.
-   Aşağı kaydırıp sekmelerin kendiliğinden seçildiğini gösterin
+2. Sağdaki telefonda başlığın altındaki **indirim vitrinini** gösterin: kendiliğinden kayar, noktalar konumu gösterir,
+   elle de kaydırılır; bir bannera dokununca ürüne gider. Aşağı kaydırıp sekmelerin kendiliğinden seçildiğini gösterin
 3. Soldan **Tiramisu**'nun anahtarını kapatın → telefonda **anında "Tükendi"**. Tekrar açın → **"Bugün geldi"** rozetiyle geri gelir
-4. **Waffle** → ✎ → İndirim: **25 / % Yüzde** → formda `₺220 → ₺165` görünür → Kaydet → telefonda en üste çıkar
+4. **Waffle** → ✎ → İndirim: **25 / % Yüzde** → formda `₺220 → ₺165` görünür → Kaydet → vitrine yeni banner eklenir
 5. **San Sebastian** → ✎ → **＋ Galeriden / dosyadan seç** ile fotoğraf ekleyin → menüde ve afişte görünür
 6. **⎙ İndirim afişleri** → ürünleri seçin → **Masa kartı** → açılan sayfada **Yazdır / PDF**
 7. **☰ Sekmeler** → yeni bir sekme ekleyin, içine ürün koyun → telefonda yeni sekme çıkar.
@@ -119,6 +124,7 @@ js/config.js    Firebase ayarı + demo şifresi
 js/store.js     veri katmanı (localStorage veya Firestore), sekme işlemleri, indirim hesabı
 js/seed.js      örnek tatlı menüsü (32 ürün), sekmeler ve varsayılan ayarlar
 js/menu.js      müşteri menüsü mantığı
+js/promo.js     indirim vitrini (kayan banner)
 js/admin.js     panel mantığı
 js/afis.js      afiş sayfası mantığı
 ```
