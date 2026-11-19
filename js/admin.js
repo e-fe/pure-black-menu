@@ -301,7 +301,7 @@ function openEditor(it = null) {
               <label class="btn sm">＋ Galeriden / dosyadan seç<input type="file" id="photoFile" accept="image/*" hidden /></label>
               <button type="button" class="btn sm ghost danger" id="photoClear">Kaldır</button>
             </div>
-            <input name="image" type="url" value="${esc(isDataUrl(v.image) ? "" : v.image)}" placeholder="ya da bağlantı yapıştırın: https://…" aria-label="Fotoğraf bağlantısı" />
+            <input name="image" type="text" inputmode="url" autocomplete="off" value="${esc(isDataUrl(v.image) ? "" : v.image)}" placeholder="ya da bağlantı yapıştırın: https://…" aria-label="Fotoğraf bağlantısı" />
             <div class="photo-info" id="photoInfo"></div>
           </div>
         </div>

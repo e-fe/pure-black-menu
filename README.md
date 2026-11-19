@@ -120,6 +120,7 @@ sunum.html      sunum ekranı (panel + telefon yan yana)
 afis.html       indirim afişleri (yazdır / PDF)
 favicon.svg     PB logosu
 css/style.css   tüm stiller (koyu menü, açık panel)
+img/            örnek ürün fotoğrafları
 js/config.js    Firebase ayarı + demo şifresi
 js/store.js     veri katmanı (localStorage veya Firestore), sekme işlemleri, indirim hesabı
 js/seed.js      örnek tatlı menüsü (32 ürün), sekmeler ve varsayılan ayarlar
@@ -128,6 +129,18 @@ js/promo.js     indirim vitrini (kayan banner)
 js/admin.js     panel mantığı
 js/afis.js      afiş sayfası mantığı
 ```
+
+## Örnek fotoğraflar
+`img/` klasöründeki dört fotoğraf yalnızca örnek menünün dolu görünmesi içindir; kendi ürün fotoğraflarınızla
+değiştirin (panelde ürünü düzenleyip **＋ Galeriden / dosyadan seç**). Hepsi [Unsplash Lisansı](https://unsplash.com/license)
+ile ücretsiz kullanılabilir; küçültülüp kırpıldı:
+
+| Dosya | Ürün | Fotoğraf |
+|---|---|---|
+| `img/san-sebastian.jpg` | San Sebastian | [Chaman Raj](https://unsplash.com/photos/xH0TWBxGVZM) — Bask yanık cheesecake |
+| `img/ekler.jpg` | Ekler Pasta | [Emre Çoban](https://unsplash.com/photos/ZIVhImrOI3w) — çikolatalı ekler |
+| `img/kazandibi.jpg` | Kazandibi | [Kamara Rahmat](https://unsplash.com/photos/gynfA2P1dis) — karamelli flan (benzer görünümlü yer tutucu) |
+| `img/maras-dondurmasi.jpg` | Maraş Dondurması | [Kelsey Curtis](https://unsplash.com/photos/dIs-MqalSSE) — vanilyalı dondurma |
 
 ## Not
 Demo modundaki PIN girişi yalnızca gösterim içindir; şifre sayfa kaynağında görünür.

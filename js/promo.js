@@ -42,6 +42,7 @@ export function createPromo(root, { onSelect } = {}) {
   const dots = root.querySelector(".promo-dots");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let key = "", count = 0, index = 0, pausedUntil = 0, hovering = false;
+  let target = null, settleT = 0; // programla geçiş sürerken hedef banner
 
   const pause = () => { pausedUntil = Date.now() + RESUME; };
   const markDots = () => {
@@ -50,15 +51,29 @@ export function createPromo(root, { onSelect } = {}) {
   function go(i, smooth = true) {
     if (!count) return;
     index = (i + count) % count;
-    track.scrollTo({ left: index * track.clientWidth, behavior: smooth && !reduce ? "smooth" : "auto" });
+    target = index;
+    const animate = smooth && !reduce;
+    track.scrollTo({ left: index * track.clientWidth, behavior: animate ? "smooth" : "auto" });
     markDots();
+    clearTimeout(settleT);
+    settleT = setTimeout(settle, animate ? 900 : 60);
   }
+  // Hızlı art arda geçişlerde tarayıcı önceki kaydırmayı yarıda kesip yanlış bannera yapışabilir:
+  // kaydırma bitince hedefte değilse düzelt
+  function settle() {
+    if (target === null) return;
+    const w = Math.max(1, track.clientWidth);
+    if (Math.round(track.scrollLeft / w) !== target) track.scrollTo({ left: target * w, behavior: "auto" });
+    target = null;
+  }
+  track.addEventListener("scrollend", () => { if (target !== null) { clearTimeout(settleT); settleT = setTimeout(settle, 30); } });
 
   // Kaydırma konumundan aktif banner (elle kaydırınca noktalar da güncellensin)
   let raf = 0;
   track.addEventListener("scroll", () => {
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(() => {
+      if (target !== null) return; // programla geçiş sürerken noktalar ara bannerlarda gezinmesin
       const i = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
       if (i !== index && i >= 0 && i < count) { index = i; markDots(); }
     });
@@ -66,6 +81,8 @@ export function createPromo(root, { onSelect } = {}) {
 
   // Kullanıcı etkileşimi otomatik geçişi bir süre durdurur
   ["pointerdown", "touchstart", "wheel", "keydown"].forEach((ev) => track.addEventListener(ev, pause, { passive: true }));
+  // Parmakla/tekerle kaydırma başlarsa programlı hedefi bırak, kontrol kullanıcıda
+  ["pointerdown", "touchstart", "wheel"].forEach((ev) => track.addEventListener(ev, () => { target = null; clearTimeout(settleT); }, { passive: true }));
   root.addEventListener("mouseenter", () => { hovering = true; });
   root.addEventListener("mouseleave", () => { hovering = false; });
   track.addEventListener("keydown", (e) => {
