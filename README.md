@@ -131,16 +131,43 @@ js/afis.js      afiş sayfası mantığı
 ```
 
 ## Örnek fotoğraflar
-`img/` klasöründeki dört fotoğraf yalnızca örnek menünün dolu görünmesi içindir; kendi ürün fotoğraflarınızla
+`img/` klasöründeki 29 fotoğraf yalnızca örnek menünün dolu görünmesi içindir; kendi ürün fotoğraflarınızla
 değiştirin (panelde ürünü düzenleyip **＋ Galeriden / dosyadan seç**). Hepsi [Unsplash Lisansı](https://unsplash.com/license)
-ile ücretsiz kullanılabilir; küçültülüp kırpıldı:
+ile ücretsiz kullanılabilir; 640×480 (ya da benzeri) boyuta kırpılıp sıkıştırıldı. Unsplash'te o tatlının kendisi
+bulunamayanlar için görünüşü benzeyen bir tatlı **yer tutucu** olarak kullanıldı; bunları öncelikle değiştirin.
+**Şekerpare, Künefe ve İzmit Pişmaniyesi** için uygun ücretsiz fotoğraf bulunamadı, simgeleriyle duruyor.
 
 | Dosya | Ürün | Fotoğraf |
 |---|---|---|
-| `img/san-sebastian.jpg` | San Sebastian | [Chaman Raj](https://unsplash.com/photos/xH0TWBxGVZM) — Bask yanık cheesecake |
-| `img/ekler.jpg` | Ekler Pasta | [Emre Çoban](https://unsplash.com/photos/ZIVhImrOI3w) — çikolatalı ekler |
-| `img/kazandibi.jpg` | Kazandibi | [Kamara Rahmat](https://unsplash.com/photos/gynfA2P1dis) — karamelli flan (benzer görünümlü yer tutucu) |
+| `img/pure-black-kakao-pasta.jpg` | Pure Black Kakao Pasta | [Pranjall Kumar](https://unsplash.com/photos/Ak4XaExjT2s) |
+| `img/tiramisu.jpg` | Tiramisu | [Jay](https://unsplash.com/photos/Rjc0kwgs1ps) |
+| `img/ekler.jpg` | Ekler Pasta | [Emre Çoban](https://unsplash.com/photos/ZIVhImrOI3w) |
+| `img/profiterol.jpg` | Profiterol | [Zan Lazarevic](https://unsplash.com/photos/VTjiqU0-Jm4) |
+| `img/islak-kek.jpg` | Islak Kek (Brownie) | [Jessie Maxwell](https://unsplash.com/photos/JNdKjjB1FXk) |
+| `img/havuclu-kek.jpg` | Havuçlu Tarçınlı Kek | [Orkun Orcan](https://unsplash.com/photos/EvfXG4aK9d8) |
+| `img/cikolatali-sufle.jpg` | Çikolatalı Sufle | [joe boshra](https://unsplash.com/photos/g1wZMtzpRy8) |
+| `img/san-sebastian.jpg` | San Sebastian | [Chaman Raj](https://unsplash.com/photos/xH0TWBxGVZM) |
+| `img/frambuazli-cheesecake.jpg` | Frambuazlı Cheesecake | [Yulia Khlebnikova](https://unsplash.com/photos/FDYbS43jUrU) |
+| `img/limonlu-cheesecake.jpg` | Limonlu Cheesecake | [Alex Bayev](https://unsplash.com/photos/X50cvkyC4Jg) |
+| `img/fistikli-cheesecake.jpg` | Antep Fıstıklı Cheesecake | [tommao wang](https://unsplash.com/photos/gdr7OOa-sk8) |
+| `img/lotus-cheesecake.jpg` | Lotus Cheesecake | [Kivanc Erdirik](https://unsplash.com/photos/RDs5emUYWa4) — karamelli cheesecake, marka/ambalaj yok |
+| `img/kazandibi.jpg` | Kazandibi | [Kamara Rahmat](https://unsplash.com/photos/gynfA2P1dis) — yer tutucu: karamelli flan |
+| `img/firin-sutlac.jpg` | Fırın Sütlaç | [Adil Murshed](https://unsplash.com/photos/9Gm-wNAaWzg) — yer tutucu: sütlü pirinç tatlısı |
+| `img/magnolia.jpg` | Magnolia | [Tommaso Ubezio](https://unsplash.com/photos/eucZM36_tiM) — yer tutucu: katmanlı kup tatlı |
+| `img/supangle.jpg` | Supangle | [American Heritage Chocolate](https://unsplash.com/photos/YxjIO0LmDO0) — yer tutucu: çikolatalı puding |
+| `img/keskul.jpg` | Keşkül | [Lee Milo](https://unsplash.com/photos/AuW5yjwnOUo) — yer tutucu: sütlü puding |
+| `img/trilece.jpg` | Trileçe | [Shuvro Mojumder](https://unsplash.com/photos/VOC4_qMKSdA) — yer tutucu: karamelli kek |
+| `img/baklava.jpg` | Fıstıklı Baklava | [Benjamin Chambon](https://unsplash.com/photos/OEDeQheVySQ) |
+| `img/kadayif-dolmasi.jpg` | Kadayıf Dolması | [Shoeib Abolhassani](https://unsplash.com/photos/NzNFM69MMnI) — fıstıklı kadayıf yuvası |
+| `img/revani.jpg` | Revani | [Mohammad Fahim](https://unsplash.com/photos/oyVe1GRV7K8) — yer tutucu: bademli irmik tatlısı |
 | `img/maras-dondurmasi.jpg` | Maraş Dondurması | [Kelsey Curtis](https://unsplash.com/photos/dIs-MqalSSE) — vanilyalı dondurma |
+| `img/waffle.jpg` | Waffle | [Joyful](https://unsplash.com/photos/vWjvnhkjziI) |
+| `img/dondurmali-brownie.jpg` | Dondurmalı Brownie | [Nguyen Dang](https://unsplash.com/photos/Nhe5N6LWOPg) |
+| `img/dondurma-kupasi.jpg` | Meyveli Dondurma Kupası | [Camila Melim](https://unsplash.com/photos/yHQfZ9TuZn4) |
+| `img/bademli-kurabiye.jpg` | Bademli Kurabiye | [A L](https://unsplash.com/photos/M8oe-2EtPgA) |
+| `img/cikolatali-cookie.jpg` | Çikolatalı Cookie | [Jonathan Adams](https://unsplash.com/photos/D8-OhOeokjg) |
+| `img/hurmali-top.jpg` | Vegan Hurmalı Top | [Rafael Rodrigues](https://unsplash.com/photos/9wkPa2VVkdM) — yer tutucu: kuruyemişli top |
+| `img/makaron.jpg` | Makaron | [Chelsea Audibert](https://unsplash.com/photos/hV1gChgMa-k) |
 
 ## Not
 Demo modundaki PIN girişi yalnızca gösterim içindir; şifre sayfa kaynağında görünür.

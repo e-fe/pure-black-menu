@@ -32,48 +32,48 @@ const PK = "Pastalar & Kekler", CC = "Cheesecake", ST = "Sütlü Tatlılar",
 
 export const SEED_ITEMS = [
   // Pastalar & Kekler
-  mk("Pure Black Kakao Pasta", PK, 190, "İmza pastamız: siyah kakaolu pandispanya, bitter ganaj, espresso şurubu.", "🍫", true, { tags: ["imza", "çok satan"] }),
-  mk("Tiramisu", PK, 160, "Mascarpone, espresso ve kakao. Günlük hazırlanır.", "☕", true),
+  mk("Pure Black Kakao Pasta", PK, 190, "İmza pastamız: siyah kakaolu pandispanya, bitter ganaj, espresso şurubu.", "🍫", true, { tags: ["imza", "çok satan"], image: "img/pure-black-kakao-pasta.jpg" }),
+  mk("Tiramisu", PK, 160, "Mascarpone, espresso ve kakao. Günlük hazırlanır.", "☕", true, { image: "img/tiramisu.jpg" }),
   mk("Ekler Pasta", PK, 150, "Bol kremalı, sıcak çikolata soslu.", "🍫", true, { discount: { type: "pct", value: 10 }, image: "img/ekler.jpg" }),
-  mk("Profiterol", PK, 150, "Kremalı top hamurlar, bol çikolata sosu.", "🍮", true),
-  mk("Islak Kek (Brownie)", PK, 120, "Sıcak servis, yanında dondurma ile.", "🟫", true, { tags: ["sıcak"] }),
-  mk("Havuçlu Tarçınlı Kek", PK, 110, "Cevizli, krem peynir kaplamalı.", "🥕", true),
-  mk("Çikolatalı Sufle", PK, 170, "Akışkan içli, 12 dakikada fırından.", "🍫", false, { tags: ["sıcak"] }),
+  mk("Profiterol", PK, 150, "Kremalı top hamurlar, bol çikolata sosu.", "🍮", true, { image: "img/profiterol.jpg" }),
+  mk("Islak Kek (Brownie)", PK, 120, "Sıcak servis, yanında dondurma ile.", "🟫", true, { tags: ["sıcak"], image: "img/islak-kek.jpg" }),
+  mk("Havuçlu Tarçınlı Kek", PK, 110, "Cevizli, krem peynir kaplamalı.", "🥕", true, { image: "img/havuclu-kek.jpg" }),
+  mk("Çikolatalı Sufle", PK, 170, "Akışkan içli, 12 dakikada fırından.", "🍫", false, { tags: ["sıcak"], image: "img/cikolatali-sufle.jpg" }),
 
   // Cheesecake
   mk("San Sebastian", CC, 185, "Yanık yüzeyli, akışkan Bask cheesecake. Belçika çikolata sosuyla.", "🍰", true, { tags: ["çok satan"], discount: { type: "pct", value: 15 }, image: "img/san-sebastian.jpg" }),
-  mk("Frambuazlı Cheesecake", CC, 170, "Taze frambuaz sosu, tereyağlı bisküvi tabanı.", "🍓", true),
-  mk("Limonlu Cheesecake", CC, 170, "Limon kreması, hafif ve ferah.", "🍋", true),
-  mk("Antep Fıstıklı Cheesecake", CC, 195, "Fıstık kreması ve kavrulmuş fıstık.", "🍰", true, { tags: ["yeni"] }),
-  mk("Lotus Cheesecake", CC, 175, "Karamelize bisküvi kreması ve kırıntısı.", "🧁", false),
+  mk("Frambuazlı Cheesecake", CC, 170, "Taze frambuaz sosu, tereyağlı bisküvi tabanı.", "🍓", true, { image: "img/frambuazli-cheesecake.jpg" }),
+  mk("Limonlu Cheesecake", CC, 170, "Limon kreması, hafif ve ferah.", "🍋", true, { image: "img/limonlu-cheesecake.jpg" }),
+  mk("Antep Fıstıklı Cheesecake", CC, 195, "Fıstık kreması ve kavrulmuş fıstık.", "🍰", true, { tags: ["yeni"], image: "img/fistikli-cheesecake.jpg" }),
+  mk("Lotus Cheesecake", CC, 175, "Karamelize bisküvi kreması ve kırıntısı.", "🧁", false, { image: "img/lotus-cheesecake.jpg" }),
 
   // Sütlü Tatlılar
   mk("Kazandibi", ST, 120, "Geleneksel usul, karamelize tabanlı.", "🍮", true, { discount: { type: "tl", value: 20 }, image: "img/kazandibi.jpg" }),
-  mk("Fırın Sütlaç", ST, 110, "Toprak kapta, üstü kızarmış.", "🥛", true),
-  mk("Magnolia", ST, 125, "Muz ve çilekli, bisküvili.", "🍌", true, { tags: ["yeni"] }),
-  mk("Supangle", ST, 115, "Yoğun kakaolu puding, kek tabanlı.", "🍫", true),
-  mk("Keşkül", ST, 110, "Bademli, hindistan cevizli.", "🥛", true, { tags: ["glutensiz"] }),
-  mk("Trileçe", ST, 130, "Üç sütlü, karamel soslu Balkan tatlısı.", "🍯", false),
+  mk("Fırın Sütlaç", ST, 110, "Toprak kapta, üstü kızarmış.", "🥛", true, { image: "img/firin-sutlac.jpg" }),
+  mk("Magnolia", ST, 125, "Muz ve çilekli, bisküvili.", "🍌", true, { tags: ["yeni"], image: "img/magnolia.jpg" }),
+  mk("Supangle", ST, 115, "Yoğun kakaolu puding, kek tabanlı.", "🍫", true, { image: "img/supangle.jpg" }),
+  mk("Keşkül", ST, 110, "Bademli, hindistan cevizli.", "🥛", true, { tags: ["glutensiz"], image: "img/keskul.jpg" }),
+  mk("Trileçe", ST, 130, "Üç sütlü, karamel soslu Balkan tatlısı.", "🍯", false, { image: "img/trilece.jpg" }),
 
   // Şerbetli Tatlılar
-  mk("Fıstıklı Baklava (porsiyon)", SR, 210, "Antep fıstıklı, 4 dilim.", "🥮", true),
-  mk("Kadayıf Dolması", SR, 160, "Cevizli, kıtır kadayıf.", "🥮", true),
+  mk("Fıstıklı Baklava (porsiyon)", SR, 210, "Antep fıstıklı, 4 dilim.", "🥮", true, { image: "img/baklava.jpg" }),
+  mk("Kadayıf Dolması", SR, 160, "Cevizli, kıtır kadayıf.", "🥮", true, { image: "img/kadayif-dolmasi.jpg" }),
   mk("Şekerpare", SR, 100, "Ev usulü, fındıklı.", "🟡", true),
-  mk("Revani", SR, 95, "İrmikli, hindistan cevizli.", "🟡", true),
+  mk("Revani", SR, 95, "İrmikli, hindistan cevizli.", "🟡", true, { image: "img/revani.jpg" }),
   mk("Künefe", SR, 220, "Sıcak servis, Hatay peyniri ile.", "🧀", false, { tags: ["sıcak"] }),
 
   // Dondurma & Waffle
   mk("Maraş Dondurması", DW, 0, "Kase: Küçük 2 top · Orta 3 top · Büyük 4 top.", "🍨", true, { tags: ["soğuk"], sizes: [90, 120, 150], discount: { type: "pct", value: 20 }, image: "img/maras-dondurmasi.jpg" }),
-  mk("Waffle", DW, 220, "Muz, çilek, Belçika çikolatası.", "🧇", true, { tags: ["sıcak"] }),
-  mk("Dondurmalı Brownie", DW, 165, "Sıcak brownie üzerine vanilyalı dondurma.", "🍨", true),
-  mk("Meyveli Dondurma Kupası", DW, 175, "Üç top dondurma, mevsim meyveleri.", "🍦", false, { tags: ["soğuk"] }),
+  mk("Waffle", DW, 220, "Muz, çilek, Belçika çikolatası.", "🧇", true, { tags: ["sıcak"], image: "img/waffle.jpg" }),
+  mk("Dondurmalı Brownie", DW, 165, "Sıcak brownie üzerine vanilyalı dondurma.", "🍨", true, { image: "img/dondurmali-brownie.jpg" }),
+  mk("Meyveli Dondurma Kupası", DW, 175, "Üç top dondurma, mevsim meyveleri.", "🍦", false, { tags: ["soğuk"], image: "img/dondurma-kupasi.jpg" }),
 
   // Kurabiye & Kurular
   mk("İzmit Pişmaniyesi", KK, 90, "Kocaeli'nin meşhur pişmaniyesi, Antep fıstıklı.", "🍥", true, { tags: ["yöresel"] }),
-  mk("Bademli Kurabiye (3 adet)", KK, 80, "Glutensiz, badem unlu.", "🍪", true, { tags: ["glutensiz"] }),
-  mk("Çikolatalı Cookie", KK, 75, "Bol damla çikolatalı, yumuşak içli.", "🍪", true),
-  mk("Vegan Hurmalı Top", KK, 70, "Şeker ilavesiz, hindistan cevizli.", "🌰", true, { tags: ["vegan", "şekersiz"] }),
-  mk("Makaron (3 adet)", KK, 120, "Frambuaz, fıstık, çikolata.", "🍬", false),
+  mk("Bademli Kurabiye (3 adet)", KK, 80, "Glutensiz, badem unlu.", "🍪", true, { tags: ["glutensiz"], image: "img/bademli-kurabiye.jpg" }),
+  mk("Çikolatalı Cookie", KK, 75, "Bol damla çikolatalı, yumuşak içli.", "🍪", true, { image: "img/cikolatali-cookie.jpg" }),
+  mk("Vegan Hurmalı Top", KK, 70, "Şeker ilavesiz, hindistan cevizli.", "🌰", true, { tags: ["vegan", "şekersiz"], image: "img/hurmali-top.jpg" }),
+  mk("Makaron (3 adet)", KK, 120, "Frambuaz, fıstık, çikolata.", "🍬", false, { image: "img/makaron.jpg" }),
 ];
 
 export const DEFAULT_SETTINGS = {

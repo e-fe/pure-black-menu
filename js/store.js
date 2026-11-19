@@ -94,7 +94,7 @@ function settingsRemove(s, name) {
 /* ------------------------------------------------------------------ */
 /*  LocalStore                                                         */
 /* ------------------------------------------------------------------ */
-const KEY = "pureblack-menu-v4"; // v4: örnek fotoğraflı tatlı menüsü
+const KEY = "pureblack-menu-v5"; // v5: tüm örnek menü fotoğraflı
 const AUTH_KEY = "pureblack-menu-auth";
 
 class LocalStore {
